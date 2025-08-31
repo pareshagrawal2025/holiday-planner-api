@@ -8,7 +8,7 @@ The API is documented using Swagger annotations for easy understanding and testi
 
 ## Setup
 - Ensure you have InteliJ IDEA, JDK 17 and Maven installed and configured in your system.
-- Clone this project on your local computer from https://github.com/paresh-agrawal/holiday-planner-api.git.
+- Clone this project on your local computer from https://github.com/pareshagrawal2025/holiday-planner-api.git.
 - Optionally we can open the project in Eclipse or InteliJ IDEA after cloning to local.
 
 ## Build Application
