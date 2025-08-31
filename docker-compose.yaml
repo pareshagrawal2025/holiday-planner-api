@@ -1,0 +1,30 @@
+# Docker Compose configuration for the holiday API service with health check and network settings
+# docker-compose must be available in your system to start services.
+services:
+  holiday-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - NAGER_DATE_API_URL=https://date.nager.at/api/v3/PublicHolidays/{year}/{countryCode}
+      - NAGAR_AVAILABLE_COUNTRIES_API_URL=https://date.nager.at/api/v3/AvailableCountries
+      - DEFAULT_NUMBER_OF_HOLIDAYS_TO_RETURN=3
+      - MAX_NUMBER_OF_HOLIDAYS_CAN_BE_RETURNED=12
+      - MIN_HOLIDAY_SEARCH_SUPPORTED_YEAR=1975
+      - MAX_HOLIDAY_SEARCH_SUPPORTED_YEAR=2075
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/management/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - monitoring-network
+
+
+networks:
+  monitoring-network:
+    driver: bridge
