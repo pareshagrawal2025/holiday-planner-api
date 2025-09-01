@@ -1,5 +1,5 @@
 # Introduction
-This project `holiday-planner-api` is a demo Spring Boot 3.5.5 application that provides a RESTful API to fetch holiday data using the Nager Date API. 
+This project `holiday-planner-api` is a demo Spring Boot application that provides a RESTful API to fetch holiday data using the Nager Date API. 
 The application includes endpoints to retrieve the last given number of holidays for a specified country, 
 non-weekend holidays count for multiple countries in a given year, and find shared holidays between two countries in a specified year. 
 The API is documented using Swagger annotations for easy understanding and testing.
@@ -7,9 +7,9 @@ The API is documented using Swagger annotations for easy understanding and testi
 # Holiday API Setup and Usage
 
 ## Setup
-- Ensure you have InteliJ IDEA, JDK 17 and Maven installed and configured in your system.
+- Ensure you have JDK 17 and Maven installed and configured in your system.
 - Clone this project on your local computer from https://github.com/pareshagrawal2025/holiday-planner-api.git.
-- Optionally we can open the project in Eclipse or InteliJ IDEA after cloning to local.
+- Optionally we can open the project in Eclipse or InteliJ IDEA or any code editor after cloning to local.
 
 ## Build Application
 - Open a terminal and navigate to the project root directory.
@@ -19,7 +19,7 @@ The API is documented using Swagger annotations for easy understanding and testi
 ## Check Test Reports
 - After successful build, open file manager and navigate to the `{project root}/target/site/jacoco` directory.
 - Open `index.html` present in this directory with web browser to check test coverage report.
-- This report will show code coverage of unit tests. It is not 100% but good enough for this demo application.
+- This report will show code coverage of unit tests. 95% code coverage achieved for application with no sonar security issue.
 
 ## Run the Application
 - If build is successful then we can run the application from terminal.
@@ -27,12 +27,14 @@ The API is documented using Swagger annotations for easy understanding and testi
 - The application will start on `http://localhost:8080`
 
 ## Run Application using Docker-Compose
-- Ensure you have Docker and Docker Compose installed and configured in your system.
+- Ensure you have Docker installed and configured in your system.
 - After building application with `mvnw clean package` 
-- run `docker-compose up` from the project root.
+- run `docker compose up -d` from the project root directory. It should build docker image and start the container.
+- Optionally we can run `sh build_docker.sh` to build image with tag 1.0.0. It will build image `holidayplanner.example.com/api/holiday-planner-api:1.0.0`
+- We can change in docker-compose.yml file to use this image instead of building at startup of `docker compose up -d`. Just comment (#) line 7,8,9 and uncomment line 6.
 
 ## Access Swagger UI
-- Open `http://localhost:8080/swagger-ui/index.html` in a browser to view the interactive API documentation.
+- Open `http://localhost:8080/swagger-ui/index.html` in web browser to view the interactive API documentation.
 - We can test the endpoints directly from the Swagger UI.
 
 ## Health Checks
@@ -40,17 +42,23 @@ The API is documented using Swagger annotations for easy understanding and testi
 - It should return `{"status":"UP"}` if the application is running correctly.
 - We can also access info and prometheus endpoints like `/management/info`, `/management/prometheus`, etc.
 
-## Test Endpoints
+## API Endpoints
 - **Last given number of Holidays**: `GET /api/holidays/last-number-of-holidays/NL?numberOfHolidays=3`
-    - Returns the last number of given (default 3 max 12) holidays celebrated in the Netherlands (e.g., based on today’s date, August 31, 2025).
+    - Returns the last number of given (default 3 max 12) holidays celebrated in the Netherlands (e.g., based on today’s date, September 1, 2025).
 - **Non-Weekend Holiday Counts**: `GET /api/holidays/non-weekend/2025?countryCodes=NL,DE,FR`
-    - Returns the count of non-weekend holidays for the NL, DE and FR in 2025, sorted by count.
+    - Returns the count of non-weekend holidays for the NL, DE and FR in 2025, sorted by count high to low.
 - **Shared Holidays**: `GET /api/holidays/shared/2025/NL/DE`
-    - Returns holidays celebrated on the same date in both the NL and DE, with local names.
+    - Returns holidays celebrated on the same date in both countries NL and DE, with local names.
 
-## Notes
-- The Nager Date API is used to fetch public holiday data. Ensure internet connectivity for API calls.
+## Developer Notes
+- spring-boot as base framework, caffeine for caching, springdoc-openapi-starter-webmvc-ui for API docs, 
+  spring-boot-starter-test and jacoco for testing, some other util api and Java 17 are used for the application.
+- Error handling is very good for application, validation added for input parameters like country codes and year parameters.
+- Application collects all user input errors in one go and returns to user instead of failing on first error.
+- Performance is improved with caching of API responses using Caffeine cache.
+- Unit tests are provided for application to ensure the correctness of the business logic.
+- The Nager Date API is used to fetch public holiday data. Ensure internet connectivity available for API calls.
 - The `holiday-planner-api` handles the logic for each requirement, including deduplication and sorting.
-- Swagger annotations (`@Operation`, `@ApiResponses`, `@Parameter`, `@Tag`, `@Schema`) provide detailed documentation, making the API user-friendly. 
+- Swagger annotations (`@Operation`, `@ApiResponses`, `@Parameter`, `@Tag`, `@Schema`) provide detailed documentation, making the API user-friendly.
 - The code assumes holidays are fetched in the format provided by Nager Date (date in `YYYY-MM-DD` and `localName`).
-- Error handling is very good for application, validation added for country codes and year parameters.
+

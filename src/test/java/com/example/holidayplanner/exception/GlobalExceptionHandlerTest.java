@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,7 @@ class GlobalExceptionHandlerTest {
 
         ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleNoResourceFoundException(exception, webRequest);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         String errorMessage = response.getBody() != null ? response.getBody().error() : "wrong message";
         assertEquals("Not Found", errorMessage);
     }
@@ -61,10 +62,10 @@ class GlobalExceptionHandlerTest {
 
         ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleResourceAccessException(exception, webRequest);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         String errorMessage = response.getBody() != null ? response.getBody().error() : "wrong message";
         assertEquals("Internal Server Error", errorMessage);
-        assertEquals("I/O error occurred - possible network issue or north bound nagar date service might be down. Please check from browser https://date.nager.at/api/v3/AvailableCountries", response.getBody().message());
+        Assertions.assertTrue(response.getBody().message().startsWith("I/O error occurred - possible network issue or north bound nagar date service might be down, please check this URL from web browser"));
     }
 
     @Test

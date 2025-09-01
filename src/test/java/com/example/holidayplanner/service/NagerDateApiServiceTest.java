@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class NagerDateApiServiceTest {
 
@@ -45,8 +47,8 @@ class NagerDateApiServiceTest {
     @InjectMocks
     private NagerDateApiService nagerDateApiService;
 
-    private static final String AVAILABLE_COUNTRIES_URL = "https://date.nager.at/api/v3/AvailableCountries";
-    private static final String HOLIDAYS_URL = "https://date.nager.at/api/v3/PublicHolidays/2023/NL";
+    private static final String AVAILABLE_COUNTRIES_URL = "https://dummyurl.com/api/v3/AvailableCountries";
+    private static final String HOLIDAYS_URL = "https://dummyurl.com/api/v3/PublicHolidays/2023/NL";
 
     @BeforeEach
     void setUp() {

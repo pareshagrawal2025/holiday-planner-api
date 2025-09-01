@@ -18,14 +18,16 @@ import org.springframework.stereotype.Service;
 import com.example.holidayplanner.model.CountryHolidayCount;
 import com.example.holidayplanner.model.Holiday;
 import com.example.holidayplanner.model.SharedHoliday;
+import com.example.holidayplanner.service.contract.HolidayServiceContract;
 import com.example.holidayplanner.validation.InputParameterValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+// This service class contains business logic for all holiday API related operations
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class HolidayService {
+public class HolidayService implements HolidayServiceContract {
 
     @Value("${default.number.of.holidays.to-return:3}")
     private int numberOfHolidays;
@@ -35,10 +37,12 @@ public class HolidayService {
     private final InputParameterValidator inputParameterValidator;
     private final  ObjectMapper objectMapper;
 
+    // Fetch holidays for given year and country code from Nager Date API service
     private List<Holiday> fetchHolidays(int year, String countryCode) {
         return nagerDateApiService.fetchHolidays(year, countryCode.toUpperCase());
     }
 
+    // Convert list of objects to JSON string for logging purpose
     public String getJsonString(List<?> listOfObjects, Class<?> classType) {
         StringBuilder stringBuilder = new StringBuilder();
             for (Object inputObject : listOfObjects) {
@@ -60,6 +64,8 @@ public class HolidayService {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    // Fetch holidays for current and previous year to get last N holidays
+    @Override
     public List<Holiday> getLastNumberOfHolidays(String countryCode, Integer inputNumberOfHolidays) {
         if (inputNumberOfHolidays == null || inputNumberOfHolidays <= 0) {
             inputNumberOfHolidays = numberOfHolidays;
@@ -67,9 +73,10 @@ public class HolidayService {
         inputParameterValidator.validateCountryCodesAndDays(new HashSet<>(Collections.singletonList(countryCode.toUpperCase())), inputNumberOfHolidays);
         LocalDate today = LocalDate.now();
         int currentYear = today.getYear();
-        // Fetch holidays for current and previous year
+        // Fetch holidays for current year
         List<Holiday> currentYearAllHolidays = new ArrayList<>(fetchHolidays(currentYear, countryCode));
         List<Holiday> holidaysToReturn = getLastGivenNumberOfHolidays(currentYearAllHolidays, today, inputNumberOfHolidays);
+        // If requested count of holidays in current year is lower than input Number of holidays, fetch from previous year
         if (holidaysToReturn.size() < inputNumberOfHolidays) {
             // Fetch holidays for previous year
             List<Holiday> lastYearAllHolidays = fetchHolidays(currentYear - 1, countryCode);
@@ -80,11 +87,14 @@ public class HolidayService {
         return holidaysToReturn;
     }
 
+    // Fetch holidays for given year and comma separated country codes and count non-weekend holidays
+    @Override
     public List<CountryHolidayCount> getNonWeekendHolidayCounts(int year, String countryCodes) {
         HashSet<String> countryCodesSet = new HashSet<>(List.of(countryCodes.toUpperCase().split(",")));
         inputParameterValidator.validateCountryCodesAndYear(year, countryCodesSet);
         List<CountryHolidayCount> holidayCounts = new ArrayList<>();
 
+        // For each country code fetch holidays and count non-weekend holidays
         for (String countryCode : countryCodesSet) {
             List<Holiday> holidays = fetchHolidays(year, countryCode);
             long nonWeekendCount = holidays.stream()
@@ -102,6 +112,8 @@ public class HolidayService {
         return countryHolidayCounts;
     }
 
+    // Fetch holidays for given year and two country codes and find shared holidays
+    @Override
     public List<SharedHoliday> getSharedHolidays(String year, String countryCode1, String countryCode2) {
         inputParameterValidator.validateSharedHolidayCountryCodesAndYear(year, new HashSet<>(List.of(countryCode1.toUpperCase(), countryCode2.toUpperCase())));
         List<Holiday> holidays1 = fetchHolidays(Integer.parseInt(year), countryCode1);
@@ -111,6 +123,7 @@ public class HolidayService {
         for (Holiday holiday : holidays1) {
             holidayMap1.putIfAbsent(holiday.getDate(), holiday.getLocalName());
         }
+        // Find shared holidays based on date
         List<SharedHoliday> sharedHolidays = holidays2.stream()
                 .filter(holiday -> holidayMap1.containsKey(holiday.getDate()))
                 .map(holiday -> new SharedHoliday(holiday.getDate(), holidayMap1.get(holiday.getDate()), holiday.getLocalName()))

@@ -5,9 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import org.springframework.cache.annotation.EnableCaching;
 
+// Main application class to bootstrap the Spring Boot application
 @EnableCaching
-@SpringBootApplication//(exclude = {ErrorMvcAutoConfiguration.class})
-public class HolidayPlannerApiApplication {
+@SpringBootApplication
+public class
+HolidayPlannerApiApplication{
 
     public static void main(String[] args) {
         SpringApplication.run(HolidayPlannerApiApplication.class, args);

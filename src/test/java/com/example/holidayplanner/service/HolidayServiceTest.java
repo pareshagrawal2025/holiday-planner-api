@@ -65,6 +65,30 @@ class HolidayServiceTest {
     }
 
     @Test
+    @DisplayName("Test getLastNumberOfHolidays with valid input and also holiday of previous year")
+    void getLastNumberOfHolidays_ValidInput_ReturnsCurrentAndPreviousYearHolidays() {
+        List<Holiday> currentYearHoliday = List.of(
+                new Holiday("2025-01-01", "Nieuwjaarsdag"),
+                new Holiday("2025-04-18", "Goede Vrijdag")
+        );
+        List<Holiday> lastYearHoliday = List.of(
+                new Holiday("2024-05-20", "Tweede Pinksterdag"),
+                new Holiday("2024-12-25", "Eerste Kerstdag"),
+                new Holiday("2024-12-26", "Tweede Kerstdag")
+                );
+        int currentYear = 2025;
+        int lastYear = 2024;
+        when(nagerDateApiService.fetchHolidays(eq(currentYear), anyString())).thenReturn(currentYearHoliday);
+        when(nagerDateApiService.fetchHolidays(eq(lastYear), anyString())).thenReturn(lastYearHoliday);
+
+        List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", 4);
+
+        assertEquals(4, holidays.size());
+        assertEquals("Goede Vrijdag", holidays.get(0).getLocalName());
+        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), anyInt());
+    }
+
+    @Test
     @DisplayName("Test getLastNumberOfHolidays with default number of holidays")
     void getLastNumberOfHolidays_DefaultNumberOfHolidays_ReturnsHolidays() {
         ReflectionTestUtils.setField(holidayService, "numberOfHolidays", 3);

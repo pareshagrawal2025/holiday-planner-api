@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+// Open API configuration class to set up API metadata and server information
 @Configuration
 public class OpenAPIConfig {
 

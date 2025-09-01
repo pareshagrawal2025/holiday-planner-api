@@ -21,6 +21,7 @@ import com.example.holidayplanner.model.Holiday;
 import com.example.holidayplanner.model.SharedHoliday;
 import com.example.holidayplanner.service.HolidayService;
 
+// REST controller to handle holiday-related API requests with Swagger documentation
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/holidays")

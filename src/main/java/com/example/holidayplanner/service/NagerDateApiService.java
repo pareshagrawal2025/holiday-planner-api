@@ -18,8 +18,8 @@ import com.example.holidayplanner.exception.InvalidParameterException;
 import com.example.holidayplanner.model.AvailableCountry;
 import com.example.holidayplanner.model.Holiday;
 
-// This class would contain methods to interact with the Nager.Date API
-// For example, fetching public holidays for a given country and year
+// This class would contain methods to interact with the Nager Date API
+// For example, fetching supported country codes and public holidays for a given country and year
 @Component
 @RequiredArgsConstructor
 public class NagerDateApiService {
@@ -31,6 +31,7 @@ public class NagerDateApiService {
 
     private final RestClient restClient;
 
+    // Fetch all supported country codes from Nager Date API and cache the result
     @Cacheable("availableCountries")
     public Set<AvailableCountry> getAvailableCountries() {
         try {
@@ -47,6 +48,7 @@ public class NagerDateApiService {
         }
     }
 
+    // Fetch holidays for given year and country code from Nager Date API and cache the result
     @Cacheable(value = "holidays", key = "#year + '_' + #countryCode")
     public List<Holiday> fetchHolidays(int year, String countryCode) {
         String url = nagerDateApi.replace("{year}", String.valueOf(year)).replace("{countryCode}", countryCode);
