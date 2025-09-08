@@ -1,0 +1,176 @@
+openapi: 3.1.0
+info:
+  title: Holiday Information API
+  description: API for retrieving holiday information using Nager Date API
+  contact:
+    name: Holiday Planner Team
+    url: https://holidayplanner.example.com
+    email: support@holidayplanner.example.com
+  license:
+    name: Apache 2 License
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+  description: Development server
+tags:
+- name: Holiday API
+  description: API for retrieving holiday information from Nager Date API service
+paths:
+  /api/holidays/shared/{year}/{countryCode1}/{countryCode2}:
+    get:
+      tags:
+      - Holiday API
+      summary: Get shared holidays between two countries
+      description: "Returns a deduplicated list of holidays celebrated on the same\
+        \ date in both countries for the given year, including local names."
+      operationId: getSharedHolidays
+      parameters:
+      - name: year
+        in: path
+        description: Year for which to retrieve holidays supported value 1975 to 2075
+          inclusive
+        required: true
+        schema:
+          type: string
+        example: 2025
+      - name: countryCode1
+        in: path
+        description: First ISO 3166-1 alpha-2 country code case insensitive
+        required: true
+        schema:
+          type: string
+        example: NL
+      - name: countryCode2
+        in: path
+        description: Second ISO 3166-1 alpha-2 country code case insensitive
+        required: true
+        schema:
+          type: string
+        example: FR
+      responses:
+        "200":
+          description: Successfully retrieved shared holidays
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedHoliday"
+        "400":
+          description: Invalid year or country codes
+        "500":
+          description: Server error
+  /api/holidays/non-weekend/{year}:
+    get:
+      tags:
+      - Holiday API
+      summary: Get count of non-weekend holidays
+      description: "Returns the number of public holidays not falling on weekends\
+        \ for each country in the given year, sorted in descending order."
+      operationId: getNonWeekendHolidayCounts
+      parameters:
+      - name: year
+        in: path
+        description: Year for which to retrieve holidays supported value 1975 to 2075
+          inclusive
+        required: true
+        schema:
+          type: integer
+          format: int32
+        example: 2025
+      - name: countryCodes
+        in: query
+        description: List of ISO 3166-1 alpha-2 country codes case insensitive comma
+          separated
+        required: true
+        schema:
+          type: string
+        example: "NL,DE"
+      responses:
+        "400":
+          description: Invalid year or country codes
+        "500":
+          description: Server error
+        "200":
+          description: Successfully retrieved holiday counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountryHolidayCount"
+  /api/holidays/last-number-of-holidays/{countryCode}:
+    get:
+      tags:
+      - Holiday API
+      summary: Get last given celebrated holidays for a country
+      description: "Returns the most recent provided number of holidays (default 3)\
+        \ max 12 celebrated in the specified country, including date and local name."
+      operationId: getLastNumberOfHolidays
+      parameters:
+      - name: countryCode
+        in: path
+        description: ISO 3166-1 alpha-2 country code case insensitive
+        required: true
+        schema:
+          type: string
+        example: NL
+      - name: numberOfHolidays
+        in: query
+        description: Number of holidays required default 3 max 12
+        required: false
+        schema:
+          type: integer
+          format: int32
+        example: 3
+      responses:
+        "200":
+          description: Successfully retrieved holidays
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Holiday"
+        "400":
+          description: Invalid country code
+        "500":
+          description: Server error
+components:
+  schemas:
+    SharedHoliday:
+      type: object
+      description: Represents a holiday celebrated in two countries
+      properties:
+        date:
+          type: string
+          description: Date of the holiday in YYYY-MM-DD format
+          example: 2025-01-01
+        localNameCountry1:
+          type: string
+          description: Local name of the holiday in the first country
+          example: Nieuwjaarsdag
+        localNameCountry2:
+          type: string
+          description: Local name of the holiday in the second country
+          example: Neujahr
+    CountryHolidayCount:
+      type: object
+      description: Represents the count of public holidays for a country
+      properties:
+        countryCode:
+          type: string
+          description: Country code (ISO 3166-1 alpha-2)
+          example: NL
+        holidayCount:
+          type: integer
+          format: int32
+          description: Number of public holidays not on weekends
+          example: 10
+    Holiday:
+      type: object
+      description: Represents a public holiday
+      properties:
+        date:
+          type: string
+          description: Date of the holiday in YYYY-MM-DD format
+          example: 2025-01-01
+        localName:
+          type: string
+          description: Local name of the holiday
+          example: Nieuwjaarsdag
