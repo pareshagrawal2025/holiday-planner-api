@@ -91,6 +91,24 @@ public class InputParameterValidator {
         }
     }
 
+    // Validate input number of holidays is a number and within supported range
+    // Append error message to the provided list if invalid input value found
+    private void validateInputNumberOfHolidays(String inputNumberOfHolidaysStr, ArrayList<String> errorMessages) {
+        if (StringUtils.isEmpty(inputNumberOfHolidaysStr)) {
+            // use default value if input is empty or null
+            return;
+        }
+
+        try {
+            int inputNumberOfHolidays = Integer.parseInt(inputNumberOfHolidaysStr);
+            if (inputNumberOfHolidays > maxHolidayDays) {
+                errorMessages.add(String.format("non-supported numberOfHolidays '%d', must be between 1 and %d inclusive", inputNumberOfHolidays, maxHolidayDays));
+            }
+        } catch (NumberFormatException e) {
+            errorMessages.add(String.format("input number of holiday '%s' is not a valid number, must be a number between 1 and %d inclusive", inputNumberOfHolidaysStr, maxHolidayDays));
+        }
+    }
+
     // If any error in input parameters throw exception with all error messages in one go
     private void throwExceptionIfError(ArrayList <String> errorMessage){
         if (!errorMessage.isEmpty()) {
@@ -124,11 +142,9 @@ public class InputParameterValidator {
 
     // called by Holiday Service, it validates set of input country codes and number of days
     // for last N holidays
-    public void validateCountryCodesAndDays(Set<String> inputCountryCodes, int numberOfDays) {
+    public void validateCountryCodesAndDays(Set<String> inputCountryCodes, String numberOfDaysStr) {
         ArrayList <String> errorMessage = new ArrayList<>();
-        if (numberOfDays > maxHolidayDays) {
-            errorMessage.add(String.format("non-supported numberOfHolidays '%d', must be between 1 and %d inclusive", numberOfDays, maxHolidayDays));
-        }
+        validateInputNumberOfHolidays(numberOfDaysStr, errorMessage);
         validateInputCountryCodes(inputCountryCodes, errorMessage);
         checkIfCountiesSupported(nagerDateApiService.getAvailableCountries()
                 , inputCountryCodes, errorMessage);
@@ -136,12 +152,12 @@ public class InputParameterValidator {
     }
 
     // called by Holiday Service, it validates set of input country codes and input year
-    public void validateCountryCodesAndYear(int year, Set<String> inputCountryCodes) {
+    public void validateCountryCodesAndYear(String yearString, Set<String> inputCountryCodes) {
         ArrayList <String> errorMessage = new ArrayList<>();
         validateInputCountryCodes(inputCountryCodes, errorMessage);
         checkIfCountiesSupported(nagerDateApiService.getAvailableCountries()
                 , inputCountryCodes, errorMessage);
-        validateInputYear(String.valueOf(year), errorMessage);
+        validateInputYear(yearString, errorMessage);
         throwExceptionIfError(errorMessage);
     }
 

@@ -52,7 +52,7 @@ class InputParameterValidatorTest {
         Set<String> inputCountryCodes = new HashSet<>(Set.of("NL", "FR"));
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createAvailableCountries());
 
-        assertDoesNotThrow(() -> inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, 5));
+        assertDoesNotThrow(() -> inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, "5"));
         verify(nagerDateApiService).getAvailableCountries();
     }
 
@@ -63,7 +63,7 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createAvailableCountries());
 
         InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
-                inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, 5));
+                inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, "5"));
         assertTrue(exception.getMessage().contains("non ISO 3166-1 alpha-2 compliant country code(s)"));
     }
 
@@ -74,8 +74,29 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createNl());
 
         InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
-                inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, 20));
+                inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, "20"));
         assertTrue(exception.getMessage().contains("non-supported numberOfHolidays"));
+    }
+
+    @Test
+    @DisplayName("Validate non number input throw InvalidParameterException")
+    void validateCountryCodesAndDays_ValidateNonNumber_ThrowsException() {
+        Set<String> inputCountryCodes = new HashSet<>(Set.of("NL"));
+        when(nagerDateApiService.getAvailableCountries()).thenReturn(createNl());
+
+        InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
+                inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, "abc"));
+        assertTrue(exception.getMessage().contains("input number of holiday 'abc' is not a valid number"));
+    }
+
+    @Test
+    @DisplayName("Validate empty number input throw InvalidParameterException")
+    void validateCountryCodesAndDays_ValidateEmptyNumber_ThrowsException() {
+        Set<String> inputCountryCodes = new HashSet<>(Set.of("NL"));
+        when(nagerDateApiService.getAvailableCountries()).thenReturn(createNl());
+
+        assertDoesNotThrow(() -> inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, "5"));
+        verify(nagerDateApiService).getAvailableCountries();
     }
 
     @Test
@@ -84,7 +105,7 @@ class InputParameterValidatorTest {
         Set<String> inputCountryCodes = new HashSet<>(Set.of("NL"));
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createNl());
 
-        assertDoesNotThrow(() -> inputParameterValidator.validateCountryCodesAndYear(2025, inputCountryCodes));
+        assertDoesNotThrow(() -> inputParameterValidator.validateCountryCodesAndYear("2025", inputCountryCodes));
         verify(nagerDateApiService).getAvailableCountries();
     }
 
@@ -95,7 +116,7 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createAvailableCountries());
 
         Assertions.assertThrowsExactly(InvalidParameterException.class, () ->
-                inputParameterValidator.validateCountryCodesAndYear(2025, inputCountryCodes));
+                inputParameterValidator.validateCountryCodesAndYear("2025", inputCountryCodes));
         verify(nagerDateApiService).getAvailableCountries();
     }
 
@@ -128,7 +149,7 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createNl());
 
         InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
-                inputParameterValidator.validateCountryCodesAndYear(1900, inputCountryCodes));
+                inputParameterValidator.validateCountryCodesAndYear("1900", inputCountryCodes));
         assertTrue(exception.getMessage().contains("non-supported year"));
     }
 

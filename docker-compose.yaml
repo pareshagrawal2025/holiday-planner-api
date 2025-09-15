@@ -3,7 +3,7 @@
 # To start the service, run: docker-compose up -d  or docker compose up -d
 services:
   holiday-api:
-    #image: holidayplanner.example.com/api/holiday-planner-api:1.0.0
+    #image: holidayplanner.example.com/api/holiday-planner-api:2.0.0
     build:
       context: .
       dockerfile: Dockerfile

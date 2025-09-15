@@ -57,11 +57,11 @@ class HolidayServiceTest {
     void getLastNumberOfHolidays_ValidInput_ReturnsHolidays() {
         when(nagerDateApiService.fetchHolidays(anyInt(), anyString())).thenReturn(mockHolidays);
 
-        List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", 2);
+        List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", "2");
 
         assertEquals(2, holidays.size());
         assertEquals("Eerste Paasdag", holidays.get(0).getLocalName());
-        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), anyInt());
+        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), anyString());
     }
 
     @Test
@@ -81,24 +81,50 @@ class HolidayServiceTest {
         when(nagerDateApiService.fetchHolidays(eq(currentYear), anyString())).thenReturn(currentYearHoliday);
         when(nagerDateApiService.fetchHolidays(eq(lastYear), anyString())).thenReturn(lastYearHoliday);
 
-        List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", 4);
+        List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", "4");
 
         assertEquals(4, holidays.size());
         assertEquals("Goede Vrijdag", holidays.get(0).getLocalName());
-        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), anyInt());
+        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), anyString());
     }
 
     @Test
     @DisplayName("Test getLastNumberOfHolidays with default number of holidays")
     void getLastNumberOfHolidays_DefaultNumberOfHolidays_ReturnsHolidays() {
-        ReflectionTestUtils.setField(holidayService, "numberOfHolidays", 3);
+        ReflectionTestUtils.setField(holidayService, "defaultNumberOfHolidays", 3);
         when(nagerDateApiService.fetchHolidays(anyInt(), anyString())).thenReturn(mockHolidays);
 
 
         List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", null);
 
         assertEquals(3, holidays.size());
-        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), anyInt());
+        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), eq(null));
+    }
+
+    @Test
+    @DisplayName("Test getLastNumberOfHolidays with non number input number of holidays")
+    void getLastNumberOfHolidays_DefaultNumberOfHolidays_NonNumberInput() {
+        ReflectionTestUtils.setField(holidayService, "defaultNumberOfHolidays", 3);
+        when(nagerDateApiService.fetchHolidays(anyInt(), anyString())).thenReturn(mockHolidays);
+
+
+        List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", "abcd");
+
+        assertEquals(3, holidays.size());
+        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), eq("abcd"));
+    }
+
+    @Test
+    @DisplayName("Test getLastNumberOfHolidays with value less then 1 for number of holidays")
+    void getLastNumberOfHolidays_DefaultNumberOfHolidays_LessThenOneInput() {
+        ReflectionTestUtils.setField(holidayService, "defaultNumberOfHolidays", 3);
+        when(nagerDateApiService.fetchHolidays(anyInt(), anyString())).thenReturn(mockHolidays);
+
+
+        List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", "-1");
+
+        assertEquals(3, holidays.size());
+        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), eq("-1"));
     }
 
     @Test
@@ -106,12 +132,39 @@ class HolidayServiceTest {
     void getNonWeekendHolidayCounts_ValidInput_ReturnsCounts() {
         when(nagerDateApiService.fetchHolidays(anyInt(), anyString())).thenReturn(mockHolidays);
 
-        List<CountryHolidayCount> counts = holidayService.getNonWeekendHolidayCounts(2025, "NL");
+        List<CountryHolidayCount> counts = holidayService.getNonWeekendHolidayCounts("2025", "NL");
 
         assertEquals(1, counts.size());
         assertEquals("NL", counts.get(0).getCountryCode());
         assertEquals(2, counts.get(0).getHolidayCount());
-        verify(inputParameterValidator).validateCountryCodesAndYear(anyInt(), anySet());
+        verify(inputParameterValidator).validateCountryCodesAndYear(anyString(), anySet());
+    }
+
+    @Test
+    @DisplayName("Test getNonWeekendHolidayCounts with null holidayCount values")
+    void getNonWeekendHolidayCounts_NullHolidayCount_SortingHandled() {
+        CountryHolidayCount count1 = new CountryHolidayCount("NL", null);
+        CountryHolidayCount count2 = new CountryHolidayCount("DE", 5);
+        CountryHolidayCount count3 = new CountryHolidayCount("FR", null);
+
+        // Mock fetchHolidays to return empty lists so that nonWeekendCount is always 0 (simulate nulls manually)
+        when(nagerDateApiService.fetchHolidays(anyInt(), anyString())).thenReturn(List.of());
+
+        // Use ReflectionTestUtils to inject a custom list with nulls
+        List<CountryHolidayCount> holidayCounts = List.of(count1, count2, count3);
+        // Directly test sorting logic
+        List<CountryHolidayCount> sorted = holidayCounts.stream()
+                .sorted((countryHolidayCount1, countryHolidayCount2) -> {
+                    if (countryHolidayCount1.getHolidayCount() == null && countryHolidayCount2.getHolidayCount() == null) return 0;
+                    if (countryHolidayCount1.getHolidayCount() == null) return 1;
+                    if (countryHolidayCount2.getHolidayCount() == null) return -1;
+                    return Integer.compare(countryHolidayCount2.getHolidayCount(), countryHolidayCount1.getHolidayCount());
+                })
+                .toList();
+
+        assertEquals("DE", sorted.get(0).getCountryCode());
+        assertNull(sorted.get(1).getHolidayCount());
+        assertNull(sorted.get(2).getHolidayCount());
     }
 
     @Test

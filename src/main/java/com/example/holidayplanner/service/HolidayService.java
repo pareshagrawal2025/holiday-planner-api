@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class HolidayService implements HolidayServiceContract {
 
     @Value("${default.number.of.holidays.to-return:3}")
-    private int numberOfHolidays;
+    private int defaultNumberOfHolidays;
 
 
     private final NagerDateApiService nagerDateApiService;
@@ -58,21 +58,39 @@ public class HolidayService implements HolidayServiceContract {
     // Sort by date (descending) and filter past holidays
     private List<Holiday> getLastGivenNumberOfHolidays(List<Holiday> holidays, LocalDate today, int numberOfHolidaysRequired) {
         return holidays.stream()
-                .filter(holiday -> LocalDate.parse(holiday.getDate()).isBefore(today.plusDays(1)))
-                .sorted((holiday1, holiday2) -> LocalDate.parse(holiday2.getDate()).compareTo(LocalDate.parse(holiday1.getDate())))
+                .filter(holiday -> holiday.getDate() != null && LocalDate.parse(holiday.getDate()).isBefore(today.plusDays(1)))
+                .sorted((holiday1, holiday2) -> {
+                    if (holiday2.getDate() == null && holiday1.getDate() == null) return 0;
+                    if (holiday2.getDate() == null) return 1;
+                    if (holiday1.getDate() == null) return -1;
+                    return LocalDate.parse(holiday2.getDate()).compareTo(LocalDate.parse(holiday1.getDate()));
+                })
                 .limit(numberOfHolidaysRequired)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    private int getInputNumberOfHolidays(String inputNumberOfHolidaysStr) {
+        int inputNumberOfHolidays = defaultNumberOfHolidays;
+        if (inputNumberOfHolidaysStr != null) {
+            try {
+                inputNumberOfHolidays = Integer.parseInt(inputNumberOfHolidaysStr);
+                if (inputNumberOfHolidays < 1) {
+                    inputNumberOfHolidays = defaultNumberOfHolidays;
+                }
+            } catch (NumberFormatException e) {
+                log.warn("Failed to parse input number of holidays '{}', using default: {}", inputNumberOfHolidaysStr, defaultNumberOfHolidays);
+            }
+        }
+        return inputNumberOfHolidays;
+    }
+
     // Fetch holidays for current and previous year to get last N holidays
     @Override
-    public List<Holiday> getLastNumberOfHolidays(String countryCode, Integer inputNumberOfHolidays) {
-        if (inputNumberOfHolidays == null || inputNumberOfHolidays <= 0) {
-            inputNumberOfHolidays = numberOfHolidays;
-        }
-        inputParameterValidator.validateCountryCodesAndDays(new HashSet<>(Collections.singletonList(countryCode.toUpperCase())), inputNumberOfHolidays);
+    public List<Holiday> getLastNumberOfHolidays(String countryCode, String inputNumberOfHolidaysStr) {
+        inputParameterValidator.validateCountryCodesAndDays(new HashSet<>(Collections.singletonList(countryCode.toUpperCase())), inputNumberOfHolidaysStr);
         LocalDate today = LocalDate.now();
         int currentYear = today.getYear();
+        int inputNumberOfHolidays = getInputNumberOfHolidays(inputNumberOfHolidaysStr);
         // Fetch holidays for current year
         List<Holiday> currentYearAllHolidays = new ArrayList<>(fetchHolidays(currentYear, countryCode));
         List<Holiday> holidaysToReturn = getLastGivenNumberOfHolidays(currentYearAllHolidays, today, inputNumberOfHolidays);
@@ -83,29 +101,31 @@ public class HolidayService implements HolidayServiceContract {
             int remainingHolidays = inputNumberOfHolidays - holidaysToReturn.size();
             holidaysToReturn.addAll(getLastGivenNumberOfHolidays(lastYearAllHolidays, today, remainingHolidays));
         }
-        log.info("last {} holidays for country code '{}' are: {}", inputNumberOfHolidays, countryCode.toUpperCase(), getJsonString(holidaysToReturn, Holiday.class));
+        log.info("last {} holidays for country code '{}' are: {}", inputNumberOfHolidaysStr, countryCode.toUpperCase(), getJsonString(holidaysToReturn, Holiday.class));
         return holidaysToReturn;
     }
 
     // Fetch holidays for given year and comma separated country codes and count non-weekend holidays
     @Override
-    public List<CountryHolidayCount> getNonWeekendHolidayCounts(int year, String countryCodes) {
+    public List<CountryHolidayCount> getNonWeekendHolidayCounts(String yearString, String countryCodes) {
         HashSet<String> countryCodesSet = new HashSet<>(List.of(countryCodes.toUpperCase().split(",")));
-        inputParameterValidator.validateCountryCodesAndYear(year, countryCodesSet);
+        inputParameterValidator.validateCountryCodesAndYear(yearString, countryCodesSet);
         List<CountryHolidayCount> holidayCounts = new ArrayList<>();
 
         // For each country code fetch holidays and count non-weekend holidays
         for (String countryCode : countryCodesSet) {
-            List<Holiday> holidays = fetchHolidays(year, countryCode);
+            List<Holiday> holidays = fetchHolidays(Integer.parseInt(yearString), countryCode);
             long nonWeekendCount = holidays.stream()
+                    .filter(holiday ->  holiday.getDate() != null)
                     .map(holiday -> LocalDate.parse(holiday.getDate()))
                     .filter(date -> date.getDayOfWeek().getValue() <= 5) // Monday to Friday
                     .count();
-            holidayCounts.add(new CountryHolidayCount(countryCode.toUpperCase(), (int) nonWeekendCount));
+            holidayCounts.add(new CountryHolidayCount(countryCode.toUpperCase(),  (int)nonWeekendCount));
         }
         // Sort in descending order by holiday count
         List<CountryHolidayCount> countryHolidayCounts = holidayCounts.stream()
-                .sorted((c1, c2) -> Integer.compare(c2.getHolidayCount(), c1.getHolidayCount()))
+                .sorted((countryHolidayCount1, countryHolidayCount2)
+                        -> Integer.compare(countryHolidayCount2.getHolidayCount(), countryHolidayCount1.getHolidayCount()))
                 .toList();
         log.info("non weekend holiday counts for country codes '{}', are: {}", String.join(",", countryCodesSet)
                 ,getJsonString(countryHolidayCounts, CountryHolidayCount.class));
@@ -127,6 +147,7 @@ public class HolidayService implements HolidayServiceContract {
         List<SharedHoliday> sharedHolidays = holidays2.stream()
                 .filter(holiday -> holidayMap1.containsKey(holiday.getDate()))
                 .map(holiday -> new SharedHoliday(holiday.getDate(), holidayMap1.get(holiday.getDate()), holiday.getLocalName()))
+                .filter(sharedHoliday -> sharedHoliday.getDate() != null)
                 .sorted(Comparator.comparing(SharedHoliday::getDate))
                 .toList();
         log.info("shared holiday for country code '{}' and '{}' are: {}", countryCode1.toUpperCase(), countryCode2.toUpperCase()

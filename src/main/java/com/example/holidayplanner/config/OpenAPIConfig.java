@@ -24,6 +24,11 @@ public class OpenAPIConfig {
         devServer.setUrl(openApiDevUrl);
         devServer.setDescription("Development server");
 
+
+        Server productionServer = new Server();
+        productionServer.setUrl("/");
+        productionServer.setDescription("Production server");
+
         Contact contact = new Contact()
                 .name("Holiday Planner Team")
                 .email("support@holidayplanner.example.com")
@@ -35,13 +40,13 @@ public class OpenAPIConfig {
 
         Info info = new Info()
                 .title("Holiday Information API")
-                .version("1.0.0")
+                .version("2.0.0")
                 .description("API for retrieving holiday information using Nager Date API")
                 .contact(contact)
                 .license(license);
 
         return new OpenAPI()
                 .info(info)
-                .servers(List.of(devServer));
+                .servers(List.of(devServer, productionServer));
     }
 }

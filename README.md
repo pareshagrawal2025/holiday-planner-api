@@ -6,6 +6,12 @@ The API is documented using Swagger annotations for easy understanding and testi
 
 # Holiday API Setup and Usage
 
+## Api Specification
+- Application Api specification is available under  `src/main/resources/open-api/open-api-specifications.yaml`
+- Optionally we can get specification from `http://localhost:8080/api-docs` after starting the application
+- Or we can check it from swagger-ui page `http://localhost:8080/swagger-ui/index.html` when application is running.
+- We are generating Api interface and models java code from specification given in `open-api-specifications.yaml` using `openapi-generator-maven-plugin`.
+
 ## Setup
 - Ensure you have JDK 17 and Maven installed and configured in your system.
 - Clone this project on your local computer from https://github.com/pareshagrawal2025/holiday-planner-api.git.
@@ -19,7 +25,7 @@ The API is documented using Swagger annotations for easy understanding and testi
 ## Check Test Reports
 - After successful build, open file manager and navigate to the `{project root}/target/site/jacoco` directory.
 - Open `index.html` present in this directory with web browser to check test coverage report.
-- This report will show code coverage of unit tests. 95% code coverage achieved for application with no sonar security issue.
+- This report will show code coverage of unit tests. 95% code coverage achieved for application with zero sonar security issue.
 
 ## Run the Application
 - If build is successful then we can run the application from terminal.
@@ -30,7 +36,7 @@ The API is documented using Swagger annotations for easy understanding and testi
 - Ensure you have Docker installed and configured in your system.
 - After building application with `mvnw clean package` 
 - run `docker compose up -d` from the project root directory. It should build docker image and start the container.
-- Optionally we can run `sh build_docker.sh` to build image with tag 1.0.0. It will build image `holidayplanner.example.com/api/holiday-planner-api:1.0.0`
+- Optionally we can run `sh build_docker.sh` to build image with tag 2.0.0. It will build image `holidayplanner.example.com/api/holiday-planner-api:2.0.0`
 - We can change in docker-compose.yml file to use this image instead of building at startup of `docker compose up -d`. Just comment (#) line 7,8,9 and uncomment line 6.
 
 ## Access Swagger UI
@@ -43,16 +49,19 @@ The API is documented using Swagger annotations for easy understanding and testi
 - We can also access info and prometheus endpoints like `/management/info`, `/management/prometheus`, etc.
 
 ## API Endpoints
-- **Last given number of Holidays**: `GET /api/holidays/last-number-of-holidays/NL?numberOfHolidays=3`
-    - Returns the last number of given (default 3 max 12) holidays celebrated in the Netherlands (e.g., based on today’s date, September 1, 2025).
-- **Non-Weekend Holiday Counts**: `GET /api/holidays/non-weekend/2025?countryCodes=NL,DE,FR`
-    - Returns the count of non-weekend holidays for the NL, DE and FR in 2025, sorted by count high to low.
-- **Shared Holidays**: `GET /api/holidays/shared/2025/NL/DE`
-    - Returns holidays celebrated on the same date in both countries NL and DE, with local names.
+| Service Name                  | Endpoint                                                          | Description                                                                                        |
+|-------------------------------|-------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| Last given number of holidays | `GET /api/holidays/last-number-of-holidays/NL?numberOfHolidays=3` | Returns the last number of given (default 3, max 12) holidays celebrated in the Netherlands.       |
+| Non-Weekend holiday counts    | `GET /api/holidays/non-weekend/2025?countryCodes=NL,DE,FR`        | Returns the count of non-weekend holidays for NL, DE, and FR in 2025, sorted by count high to low. |
+| Shared holidays               | `GET /api/holidays/shared/2025/NL/DE`                             | Returns holidays celebrated on the same date in both countries NL and DE, with local names.        |
+| Health check                  | `GET /management/info` or `GET /management/health`                | Returns application info or health check status.                                                   |
+| Health check                  | `GET /management/prometheus`                                      | Returns application prometheus health parameters.                                                  |
+
+
 
 ## Developer Notes
-- spring-boot as base framework, caffeine for caching, springdoc-openapi-starter-webmvc-ui for API docs, 
-  spring-boot-starter-test and jacoco for testing, some other util api and Java 17 are used for the application.
+- spring-boot 3.5.5 as base framework, caffeine for caching, springdoc-openapi-starter-webmvc-ui for API docs,
+  openapi-generator, spring-boot-starter-test and jacoco for testing, some other util api and Java 17 are used for the application.
 - Error handling is very good for application, validation added for input parameters like country codes and year parameters.
 - Application collects all user input errors in one go and returns to user instead of failing on first error.
 - Performance is improved with caching of API responses using Caffeine cache.
@@ -62,3 +71,7 @@ The API is documented using Swagger annotations for easy understanding and testi
 - Swagger annotations (`@Operation`, `@ApiResponses`, `@Parameter`, `@Tag`, `@Schema`) provide detailed documentation, making the API user-friendly.
 - The code assumes holidays are fetched in the format provided by Nager Date (date in `YYYY-MM-DD` and `localName`).
 
+# Issues
+- Swager UI is not taking example values in text fields. The issue might be related to a bug in springdoc-openapi.
+- This doesn't impact functionality, but it would be good to have example values in text fields for better user experience.
+- We can manually enter values in text fields via configuration but that doesn't look good so skipped it for now.

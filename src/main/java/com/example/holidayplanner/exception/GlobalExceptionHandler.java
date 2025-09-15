@@ -1,5 +1,7 @@
 package com.example.holidayplanner.exception;
 
+import jakarta.validation.ConstraintViolationException;
+
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -20,7 +22,7 @@ public class GlobalExceptionHandler {
     private String availableCountriesApi;
 
     // Handle invalid parameter and method argument mismatch exceptions and return a structured error response
-    @ExceptionHandler({InvalidParameterException.class,MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class})
+    @ExceptionHandler({ConstraintViolationException.class, InvalidParameterException.class,MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class})
     public ResponseEntity<ErrorResponse> handleInvalidParameterException(Exception ex, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
