@@ -69,6 +69,7 @@ public class HolidayService implements HolidayServiceContract {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    // Parse input number of holidays, if invalid or less than 1 return default number of holidays
     private int getInputNumberOfHolidays(String inputNumberOfHolidaysStr) {
         int inputNumberOfHolidays = defaultNumberOfHolidays;
         if (inputNumberOfHolidaysStr != null) {
