@@ -8,9 +8,10 @@ The API is documented using Swagger annotations for easy understanding and testi
 
 ## Api Specification
 - Application Api specification is available under  `src/main/resources/open-api/open-api-specifications.yaml`
-- Optionally we can get specification from `http://localhost:8080/api-docs` after starting the application
-- Or we can check it from swagger-ui page `http://localhost:8080/swagger-ui/index.html` when application is running.
-- We are generating Api interface and models java code from specification given in `open-api-specifications.yaml` using `openapi-generator-maven-plugin`.
+- Optionally we can get specification from `http://localhost:8080/api-docs` after starting the application,
+or we can check it from swagger-ui page `http://localhost:8080/swagger-ui/index.html` when application is running.
+- We are generating Api interface and models java code from specification given in `open-api-specifications.yaml` using `openapi-generator-maven-plugin`,
+while building application with `mvnw clean package` command, code will be generated in `target/generated-sources/openapi/src/main/java` directory.
 
 ## Setup
 - Ensure you have JDK 17 and Maven installed and configured in your system.
