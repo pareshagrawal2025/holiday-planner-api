@@ -11,7 +11,7 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0
   version: 2.0.0
 servers:
-- url: http://localhost:8080
+- url: http://localhost:8090
   description: Development server
 - url: /
   description: Production server
@@ -68,8 +68,32 @@ paths:
                   $ref: "#/components/schemas/SharedHoliday"
         "400":
           description: Invalid year or country codes
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: "#/components/schemas/ErrorResponse"
+                example:
+                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                  status: 400
+                  error: Bad Request
+                  message: non ISO 3166-1 alpha-2 compliant country code(s) 'XX','YY'
+                  path: /api/holidays/shared/2025/XX/YY
         "500":
           description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: "#/components/schemas/ErrorResponse"
+                example:
+                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                  status: 500
+                  error: Internal Server Error
+                  message: Nager Date API service might be unreachable
+                  path: /api/holidays/shared/2025/NL/FR
   /api/holidays/non-weekend/{year}:
     get:
       tags:
@@ -102,8 +126,32 @@ paths:
       responses:
         "400":
           description: Invalid year or country codes
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: "#/components/schemas/ErrorResponse"
+                example:
+                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                  status: 400
+                  error: Bad Request
+                  message: non ISO 3166-1 alpha-2 compliant country code(s) 'XX'
+                  path: /api/holidays/non-weekend/2025
         "500":
           description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: "#/components/schemas/ErrorResponse"
+                example:
+                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                  status: 500
+                  error: Internal Server Error
+                  message: Nager Date API service might be unreachable
+                  path: /api/holidays/non-weekend/2025
         "200":
           description: Successfully retrieved holiday counts
           content:
@@ -152,8 +200,32 @@ paths:
                   $ref: "#/components/schemas/Holiday"
         "400":
           description: Invalid country code
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: "#/components/schemas/ErrorResponse"
+                example:
+                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                  status: 400
+                  error: Bad Request
+                  message: non ISO 3166-1 alpha-2 compliant country code(s) 'XX'
+                  path: /api/holidays/last-number-of-holidays/XX
         "500":
           description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: "#/components/schemas/ErrorResponse"
+                example:
+                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                  status: 500
+                  error: Internal Server Error
+                  message: Nager Date API service might be unreachable
+                  path: /api/holidays/last-number-of-holidays/NL
 components:
   schemas:
     SharedHoliday:
@@ -197,3 +269,29 @@ components:
           type: string
           description: Local name of the holiday
           example: Nieuwjaarsdag
+    ErrorResponse:
+      type: object
+      description: Represents an error response
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Time when the error occurred
+          example: 2025-09-15T19:00:00.0000000+02:00
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code
+          example: 400
+        error:
+          type: string
+          description: Short description of the error
+          example: Bad Request
+        message:
+          type: string
+          description: Detailed error message
+          example: Invalid country code provided.
+        path:
+          type: string
+          description: request path that caused the error
+          example: /api/holidays/shared/2025/XX/YY
