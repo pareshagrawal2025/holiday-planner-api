@@ -17,6 +17,8 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.example.holidayplanner.model.ErrorResponse;
+
 class GlobalExceptionHandlerTest {
 
     private GlobalExceptionHandler globalExceptionHandler;
@@ -39,7 +41,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleInvalidParameterException(exception, webRequest);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        String errorMessage = response.getBody() != null ? response.getBody().error() : "wrong message";
+        String errorMessage = response.getBody() != null ? response.getBody().getError(): "wrong message";
         assertEquals("Bad Request", errorMessage);
     }
 
@@ -51,7 +53,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleNoResourceFoundException(exception, webRequest);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        String errorMessage = response.getBody() != null ? response.getBody().error() : "wrong message";
+        String errorMessage = response.getBody() != null ? response.getBody().getError() : "wrong message";
         assertEquals("Not Found", errorMessage);
     }
 
@@ -63,9 +65,9 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleResourceAccessException(exception, webRequest);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        String errorMessage = response.getBody() != null ? response.getBody().error() : "wrong message";
+        String errorMessage = response.getBody() != null ? response.getBody().getError() : "wrong message";
         assertEquals("Internal Server Error", errorMessage);
-        Assertions.assertTrue(response.getBody().message().startsWith("I/O error occurred - possible network issue or north bound nagar date service might be down, please check this URL from web browser"));
+        Assertions.assertTrue(response.getBody().getMessage().startsWith("I/O error occurred - possible network issue or north bound nagar date service might be down, please check this URL from web browser"));
     }
 
     @Test
@@ -76,7 +78,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleGlobalException(exception, webRequest);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        String errorMessage = response.getBody() != null ? response.getBody().error() : "wrong message";
+        String errorMessage = response.getBody() != null ? response.getBody().getError() : "wrong message";
         assertEquals("Internal Server Error", errorMessage);
     }
 }
