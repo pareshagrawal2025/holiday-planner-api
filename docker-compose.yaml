@@ -3,14 +3,17 @@
 # To start the service, run: docker-compose up -d  or docker compose up -d
 services:
   holiday-api:
-    #image: holidayplanner.example.com/api/holiday-planner-api:2.0.0
+    #image: holidayplanner.example.com/api/holiday-planner-api:2.1.0
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+      - "11300:11300"
     environment:
+      - JAVA_OPTS=-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=11300 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.rmi.port=11300 -Djava.rmi.server.hostname=localhost -Xms128m -Xmx256m
       - SPRING_PROFILES_ACTIVE=prod
+      - LOGGING_LEVEL_COM_EXAMPLE_HOLIDAYPLANNER=WARN
       - NAGER_DATE_API_URL=https://date.nager.at/api/v3/PublicHolidays/{year}/{countryCode}
       - NAGAR_AVAILABLE_COUNTRIES_API_URL=https://date.nager.at/api/v3/AvailableCountries
       - DEFAULT_NUMBER_OF_HOLIDAYS_TO_RETURN=3
