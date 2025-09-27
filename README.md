@@ -3,8 +3,9 @@ This project `holiday-planner-api` is a demo Spring Boot application that provid
 The application includes endpoints to retrieve the last given number of holidays for a specified country, 
 non-weekend holidays count for multiple countries in a given year, and find shared holidays between two countries in a specified year. 
 The API is documented using Swagger annotations for easy understanding and testing.
+Developer followed Test Driven Development (TDD) approach to develop this application.
 
-# Holiday API Setup and Usage
+# Holiday Planner API Setup and Usage
 
 ## Api Specification
 - Application Api specification is available under  `src/main/resources/open-api/open-api-specifications.yaml`
@@ -62,12 +63,12 @@ while building application with `mvnw clean package` command, code will be gener
 | Non-Weekend holiday counts    | `GET /api/holidays/non-weekend/2025?countryCodes=NL,DE,FR`        | Returns the count of non-weekend holidays for NL, DE, and FR in 2025, sorted by count high to low. |
 | Shared holidays               | `GET /api/holidays/shared/2025/NL/DE`                             | Returns holidays celebrated on the same date in both countries NL and DE, with local names.        |
 | Health check                  | `GET /management/info` or `GET /management/health`                | Returns application info or health check status.                                                   |
-| Health check                  | `GET /management/prometheus`                                      | Returns application prometheus health parameters.                                                  |
+| Prometheus Health check       | `GET /management/prometheus`                                      | Returns application prometheus health parameters.                                                  |
 
 
 
 ## Developer Notes
-- Application frameworks are spring-boot 3.5.5 as base framework, caffeine for caching, springdoc-openapi-starter-webmvc-ui for API docs,
+- Frameworks used in application are, spring-boot 3.5.5 as base framework, caffeine for caching, springdoc-openapi-starter-webmvc-ui for API docs,
   openapi-generator, spring-boot-starter-test and jacoco for testing, maven-javadoc-plugin for java docs and some other util api 
   and Java 17 are used for the application.
 - Error handling is appropriate in application, validation added for input parameters like country codes and year parameters.
