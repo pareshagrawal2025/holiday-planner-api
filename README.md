@@ -26,8 +26,8 @@ while building application with `mvnw clean package` command, code will be gener
 ## Test Plan and Performance Test
 - Test plan is available in `docs` directory as `TestDesignDocument.md` file.
 - Performance test is done using Apache JMeter 4.0 tool.
-- Test script available inside `performance_test` directory as `api-load-test.jmx` file.
-- Application is load tested for 5 minute with 5 users, 150 request per seconds with ramp-up time and 1 seconds.
+- JMeter test script available inside `performance_test` directory as `api-load-test.jmx` file.
+- Application is load tested for 5 minute with 5 users, 150 request per seconds with ramp-up period 1 second.
 
 ## Check Test Reports
 - After successful build, open file manager and navigate to the `{project root}/target/site/jacoco` directory.
@@ -67,9 +67,10 @@ while building application with `mvnw clean package` command, code will be gener
 
 
 ## Developer Notes
-- spring-boot 3.5.5 as base framework, caffeine for caching, springdoc-openapi-starter-webmvc-ui for API docs,
-  openapi-generator, spring-boot-starter-test and jacoco for testing, some other util api and Java 17 are used for the application.
-- Error handling is very good for application, validation added for input parameters like country codes and year parameters.
+- Application frameworks are spring-boot 3.5.5 as base framework, caffeine for caching, springdoc-openapi-starter-webmvc-ui for API docs,
+  openapi-generator, spring-boot-starter-test and jacoco for testing, maven-javadoc-plugin for java docs and some other util api 
+  and Java 17 are used for the application.
+- Error handling is appropriate in application, validation added for input parameters like country codes and year parameters.
 - Application collects all user input errors in one go and returns to user instead of failing on first error.
 - Performance is improved with caching of API responses using Caffeine cache.
 - Unit tests are provided for application to ensure the correctness of the business logic.
