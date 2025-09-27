@@ -17,7 +17,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import com.example.holidayplanner.model.ErrorResponse;
+import com.example.holidayplanner.generated.model.ErrorResponse;
 
 class GlobalExceptionHandlerTest {
 

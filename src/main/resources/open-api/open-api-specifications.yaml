@@ -1,55 +1,55 @@
-openapi: 3.0.4
+openapi: "3.0.4"
 info:
-  title: Holiday Information API
-  description: API for retrieving holiday information using Nager Date API
+  title: "Holiday Information API"
+  description: "API for retrieving holiday information using Nager Date API"
   contact:
-    name: Holiday Planner Team
+    name: "Holiday Planner Team"
     url: https://holidayplanner.example.com
     email: support@holidayplanner.example.com
   license:
-    name: Apache 2 License
+    name: "Apache 2 License"
     url: https://www.apache.org/licenses/LICENSE-2.0
-  version: 2.0.0
+  version: 2.1.0
 servers:
 - url: http://localhost:8080
-  description: Development server
+  description: "Development server"
 - url: /
-  description: Production server
+  description: "Production server"
 tags:
 - name: HolidayPlanner
-  description: API for retrieving holiday information from Nager Date API service
+  description: "API for retrieving holiday information from Nager Date API service"
 paths:
   /api/holidays/shared/{year}/{countryCode1}/{countryCode2}:
     get:
       tags:
         - HolidayPlanner
-      summary: Get shared holidays between two countries
+      summary: "Get shared holidays between two countries"
       description: "Returns a deduplicated list of holidays celebrated on the same date in both countries for the given year, including local names."
       operationId: getSharedHolidays
       parameters:
         - name: year
           in: path
-          description: Year for which to retrieve holidays supported value 1975 to 2075 inclusive
+          description: "Year for which to retrieve holidays supported value 1975 to 2075 inclusive"
           required: true
           schema:
             type: string
             minLength: 4
             maxLength: 4
             pattern: "^[0-9]{4}$"
-          example: 2025
+          example: "2025"
         - name: countryCode1
           in: path
-          description: First ISO 3166-1 alpha-2 country code case insensitive
+          description: "First ISO 3166-1 alpha-2 country code case insensitive"
           required: true
           schema:
             type: string
             minLength: 2
             maxLength: 2
             pattern: "^[A-Za-z]{2}$"
-          example: NL
+          example: "NL"
         - name: countryCode2
           in: path
-          description: Second ISO 3166-1 alpha-2 country code case insensitive
+          description: "Second ISO 3166-1 alpha-2 country code case insensitive"
           required: true
           schema:
             type: string
@@ -59,7 +59,7 @@ paths:
           example: FR
       responses:
         "200":
-          description: Successfully retrieved shared holidays
+          description: "Successfully retrieved shared holidays"
           content:
             application/json:
               schema:
@@ -67,57 +67,53 @@ paths:
                 items:
                   $ref: "#/components/schemas/SharedHoliday"
         "400":
-          description: Invalid year or country codes
+          description: "Invalid year or country codes"
           content:
             application/json:
               schema:
-                type: object
-                items:
-                  $ref: "#/components/schemas/ErrorResponse"
-                example:
-                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
-                  status: 400
-                  error: Bad Request
-                  message: non ISO 3166-1 alpha-2 compliant country code(s) 'XX','YY'
-                  path: /api/holidays/shared/2025/XX/YY
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                status: "400"
+                error: "Bad Request"
+                message: "non ISO 3166-1 alpha-2 compliant country code(s) 'XX','YY'"
+                path: "/api/holidays/shared/2025/XX/YY"
         "500":
-          description: Server error
+          description: "Server error"
           content:
             application/json:
               schema:
-                type: object
-                items:
-                  $ref: "#/components/schemas/ErrorResponse"
-                example:
-                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
-                  status: 500
-                  error: Internal Server Error
-                  message: Nager Date API service might be unreachable
-                  path: /api/holidays/shared/2025/NL/FR
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                status: "500"
+                error: "Internal Server Error"
+                message: "Nager Date API service might be unreachable"
+                path: "/api/holidays/shared/2025/NL/FR"
   /api/holidays/non-weekend/{year}:
     get:
       tags:
       - HolidayPlanner
-      summary: Get count of non-weekend holidays
+      summary: "Get count of non-weekend holidays"
       description: "Returns the number of public holidays not falling on weekends\
         \ for each country in the given year, sorted in descending order."
       operationId: getNonWeekendHolidayCounts
       parameters:
       - name: year
         in: path
-        description: Year for which to retrieve holidays supported value 1975 to 2075
-          inclusive
+        description: "Year for which to retrieve holidays supported value 1975 to 2075\
+          \ inclusive"
         required: true
         schema:
           type: string
           minLength: 4
           maxLength: 4
           pattern: "^[0-9]{4}$"
-        example: 2025
+        example: "2025"
       - name: countryCodes
         in: query
-        description: List of ISO 3166-1 alpha-2 country codes case insensitive comma
-          separated
+        description: "List of ISO 3166-1 alpha-2 country codes case insensitive comma\
+          \ separated"
         required: true
         schema:
           type: string
@@ -125,35 +121,31 @@ paths:
         example: "NL,DE"
       responses:
         "400":
-          description: Invalid year or country codes
+          description: "Invalid year or country codes"
           content:
             application/json:
               schema:
-                type: object
-                items:
-                  $ref: "#/components/schemas/ErrorResponse"
-                example:
-                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
-                  status: 400
-                  error: Bad Request
-                  message: non ISO 3166-1 alpha-2 compliant country code(s) 'XX'
-                  path: /api/holidays/non-weekend/2025
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                status: "400"
+                error: "Bad Request"
+                message: "non ISO 3166-1 alpha-2 compliant country code(s) 'XX'"
+                path: "/api/holidays/non-weekend/2025"
         "500":
-          description: Server error
+          description: "Server error"
           content:
             application/json:
               schema:
-                type: object
-                items:
-                  $ref: "#/components/schemas/ErrorResponse"
-                example:
-                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
-                  status: 500
-                  error: Internal Server Error
-                  message: Nager Date API service might be unreachable
-                  path: /api/holidays/non-weekend/2025
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                status: "500"
+                error: "Internal Server Error"
+                message: "Nager Date API service might be unreachable"
+                path: "/api/holidays/non-weekend/2025"
         "200":
-          description: Successfully retrieved holiday counts
+          description: "Successfully retrieved holiday counts"
           content:
             application/json:
               schema:
@@ -164,34 +156,34 @@ paths:
     get:
       tags:
       - HolidayPlanner
-      summary: Get last given celebrated holidays for a country
+      summary: "Get last given celebrated holidays for a country"
       description: "Returns the most recent provided number of holidays (default 3)\
         \ max 12 celebrated in the specified country, including date and local name."
       operationId: getLastNumberOfHolidays
       parameters:
       - name: countryCode
         in: path
-        description: ISO 3166-1 alpha-2 country code case insensitive
+        description: "ISO 3166-1 alpha-2 country code case insensitive"
         required: true
         schema:
           type: string
           minLength: 2
           maxLength: 2
           pattern: "^[A-Za-z]{2}$"
-        example: NL
+        example: "NL"
       - name: numberOfHolidays
         in: query
-        description: Number of holidays required default 3 max 12
+        description: "Number of holidays required default 3 max 12"
         required: false
         schema:
           type: string
           minLength: 1
           maxLength: 2
           pattern: "^[0-9]{1,2}$"
-        example: 3
+        example: "3"
       responses:
         "200":
-          description: Successfully retrieved holidays
+          description: "Successfully retrieved holidays"
           content:
             application/json:
               schema:
@@ -199,99 +191,95 @@ paths:
                 items:
                   $ref: "#/components/schemas/Holiday"
         "400":
-          description: Invalid country code
+          description: "Invalid country code"
           content:
             application/json:
               schema:
-                type: object
-                items:
-                  $ref: "#/components/schemas/ErrorResponse"
-                example:
-                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
-                  status: 400
-                  error: Bad Request
-                  message: non ISO 3166-1 alpha-2 compliant country code(s) 'XX'
-                  path: /api/holidays/last-number-of-holidays/XX
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                status: 400
+                error: "Bad Request"
+                message: "non ISO 3166-1 alpha-2 compliant country code(s) 'XX'"
+                path: /api/holidays/last-number-of-holidays/XX
         "500":
           description: Server error
           content:
             application/json:
               schema:
-                type: object
-                items:
-                  $ref: "#/components/schemas/ErrorResponse"
-                example:
-                  timestamp: "2025-09-15T19:00:00.0000000+02:00"
-                  status: 500
-                  error: Internal Server Error
-                  message: Nager Date API service might be unreachable
-                  path: /api/holidays/last-number-of-holidays/NL
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: "2025-09-15T19:00:00.0000000+02:00"
+                status: 500
+                error: "Internal Server Error"
+                message: "Nager Date API service might be unreachable"
+                path: /api/holidays/last-number-of-holidays/NL
 components:
   schemas:
     SharedHoliday:
       type: object
-      description: Represents a holiday celebrated in two countries
+      description: "Represents a holiday celebrated in two countries"
       properties:
         date:
           type: string
-          description: Date of the holiday in YYYY-MM-DD format
+          description: "Date of the holiday in YYYY-MM-DD format"
           example: 2025-01-01
         localNameCountry1:
           type: string
-          description: Local name of the holiday in the first country
-          example: Nieuwjaarsdag
+          description: "Local name of the holiday in the first country"
+          example: "Nieuwjaarsdag"
         localNameCountry2:
           type: string
-          description: Local name of the holiday in the second country
-          example: Neujahr
+          description: "Local name of the holiday in the second country"
+          example: "Neujahr"
     CountryHolidayCount:
       type: object
-      description: Represents the count of public holidays for a country
+      description: "Represents the count of public holidays for a country"
       properties:
         countryCode:
           type: string
-          description: Country code (ISO 3166-1 alpha-2)
-          example: NL
+          description: "Country code (ISO 3166-1 alpha-2)"
+          example: "NL"
         holidayCount:
           type: integer
           format: int32
-          description: Number of public holidays not on weekends
+          description: "Number of public holidays not on weekends"
           example: 10
     Holiday:
       type: object
-      description: Represents a public holiday
+      description: "Represents a public holiday"
       properties:
         date:
           type: string
-          description: Date of the holiday in YYYY-MM-DD format
-          example: 2025-01-01
+          description: "Date of the holiday in YYYY-MM-DD format"
+          example: "2025-01-01"
         localName:
           type: string
-          description: Local name of the holiday
-          example: Nieuwjaarsdag
+          description: "Local name of the holiday"
+          example: "Nieuwjaarsdag"
     ErrorResponse:
       type: object
-      description: Represents an error response
+      description: "Represents an error response"
       properties:
         timestamp:
           type: string
           format: date-time
-          description: Time when the error occurred
-          example: 2025-09-15T19:00:00.0000000+02:00
+          description: "Time when the error occurred"
+          example: "2025-09-15T19:00:00.0000000+02:00"
         status:
           type: integer
           format: int32
-          description: HTTP status code
+          description: "HTTP status code"
           example: 400
         error:
           type: string
-          description: Short description of the error
-          example: Bad Request
+          description: "Short description of the error"
+          example: "Bad Request"
         message:
           type: string
-          description: Detailed error message
-          example: Invalid country code provided.
+          description: "Detailed error message"
+          example: "Invalid country code provided"
         path:
           type: string
-          description: request path that caused the error
+          description: "request path that caused the error"
           example: /api/holidays/shared/2025/XX/YY

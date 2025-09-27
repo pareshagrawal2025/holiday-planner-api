@@ -15,18 +15,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import com.example.holidayplanner.model.SharedHoliday;
-import com.example.holidayplanner.service.HolidayService;
-import com.example.holidayplanner.validation.InputParameterValidator;
+import com.example.holidayplanner.generated.model.SharedHoliday;
+import com.example.holidayplanner.service.contract.HolidayServiceContract;
+import com.example.holidayplanner.validation.HolidayServiceValidator;
 import com.jayway.jsonpath.JsonPath;
 
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -44,32 +42,32 @@ class HolidayControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private HolidayService holidayService;
+    private HolidayServiceContract holidayServiceContract;
 
     @Autowired
-    private InputParameterValidator inputParameterValidator;
+    private HolidayServiceValidator holidayServiceValidator;
 
     @TestConfiguration
     static class ContextConfiguration {
         @Bean
-        HolidayService holidayService(){
-            return Mockito.mock(HolidayService.class);
+        HolidayServiceContract holidayServiceContract(){
+            return Mockito.mock(HolidayServiceContract.class);
         }
 
         @Bean
-        InputParameterValidator inputParameterValidator() {return Mockito.mock(InputParameterValidator.class); }
+        HolidayServiceValidator holidayServiceValidator() {return Mockito.mock(HolidayServiceValidator.class); }
     }
 
 
     @BeforeEach
     void resetMocks() {
-        Mockito.reset(holidayService);
+        Mockito.reset(holidayServiceContract);
     }
 
     @Test
     @DisplayName("with valid parameters returns holidays")
     void getLastNumberOfHolidays_ExceedsMaxLimit_ReturnsBadRequest() throws Exception {
-        when(holidayService.getLastNumberOfHolidays(anyString(), anyString()))
+        when(holidayServiceContract.getLastNumberOfHolidays(anyString(), anyString()))
                 .thenThrow(new com.example.holidayplanner.exception.InvalidParameterException("non-supported numberOfHolidays '20', must be between 1 and 12 inclusive"));
         mockMvc.perform(get("/api/holidays/last-number-of-holidays/NL")
                         .param("numberOfHolidays", "20") // Exceeds max limit of 12
@@ -83,7 +81,7 @@ class HolidayControllerIntegrationTest {
     @Test
     @DisplayName("with valid parameters returns holidays")
     void getLastNumberOfHolidays_ExceedsMaxLimit_ReturnsOK() throws Exception {
-        doNothing().when(inputParameterValidator).validateCountryCodesAndDays(anySet(), anyString());
+        doNothing().when(holidayServiceValidator).validateCountryCodesAndDays(anySet(), anyString());
 
         mockMvc.perform(get("/api/holidays/last-number-of-holidays/NL")
                         .param("numberOfHolidays", "20") // Exceeds max limit of 12
@@ -96,7 +94,7 @@ class HolidayControllerIntegrationTest {
     @Test
     @DisplayName("with valid country code returns ok")
     void getNonWeekendHolidayCounts_ValidCountryCodes_ReturnsBadRequest() throws Exception {
-        doNothing().when(inputParameterValidator).validateCountryCodesAndYear(anyString(), anySet());
+        doNothing().when(holidayServiceValidator).validateCountryCodesAndYear(anyString(), anySet());
 
         mockMvc.perform(get("/api/holidays/non-weekend/2025")
                         .param("countryCodes", "NL") // Valid country code
@@ -109,7 +107,7 @@ class HolidayControllerIntegrationTest {
     @Test
     @DisplayName("with invalid country code returns bad request")
     void getNonWeekendHolidayCounts_InvalidCountryCodes_ReturnsBadRequest() throws Exception {
-        when(holidayService.getNonWeekendHolidayCounts(anyString(), anyString()))
+        when(holidayServiceContract.getNonWeekendHolidayCounts(anyString(), anyString()))
                 .thenThrow(new com.example.holidayplanner.exception.InvalidParameterException("non ISO 3166-1 alpha-2 compliant country code(s) 'XYZ'"));
 
         mockMvc.perform(get("/api/holidays/non-weekend/2025")
@@ -125,7 +123,7 @@ class HolidayControllerIntegrationTest {
     @DisplayName("with invalid year format returns bad request")
     void getSharedHolidays_InvalidYearFormat_ReturnsBadRequest() throws Exception {
         Mockito.doThrow(new com.example.holidayplanner.exception.InvalidParameterException("year 'invalidYear' is not a valid year, must be a number between 1975 and 2075 inclusive"))
-                .when(holidayService)
+                .when(holidayServiceContract)
                 .getSharedHolidays(anyString(), anyString(), anyString());
 
         mockMvc.perform(get("/api/holidays/shared/invalidYear/NL/FR")
@@ -142,7 +140,7 @@ class HolidayControllerIntegrationTest {
     @Test
     @DisplayName("with invalid year 1800 returns bad request")
     void getNonWeekendHolidayCounts_InvalidYear_ReturnsBadRequest() throws Exception {
-        when(holidayService.getNonWeekendHolidayCounts(anyString(), anyString()))
+        when(holidayServiceContract.getNonWeekendHolidayCounts(anyString(), anyString()))
                 .thenThrow(new com.example.holidayplanner.exception.InvalidParameterException("non-supported year '1800', must be between 1975 and 2075 inclusive"));
 
         mockMvc.perform(get("/api/holidays/non-weekend/1800?countryCodes=NL")
@@ -159,7 +157,7 @@ class HolidayControllerIntegrationTest {
         SharedHoliday[] sharedHolidays = new SharedHoliday[]{
                 new SharedHoliday("2025-01-01", "Nieuwjaarsdag", "Neujahr")
         };
-        when(holidayService.getSharedHolidays(anyString(), anyString(), anyString())).thenReturn(Arrays.asList(sharedHolidays));
+        when(holidayServiceContract.getSharedHolidays(anyString(), anyString(), anyString())).thenReturn(Arrays.asList(sharedHolidays));
 
         mockMvc.perform(get("/api/holidays/shared/2025/NL/DE")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -172,7 +170,7 @@ class HolidayControllerIntegrationTest {
     @Test
     @DisplayName("with invalid country code returns bad request")
     void getSharedHolidays_InvalidCountry_ReturnsBadRequest() throws Exception {
-        when(holidayService.getSharedHolidays(anyString(), anyString(), anyString()))
+        when(holidayServiceContract.getSharedHolidays(anyString(), anyString(), anyString()))
                 .thenThrow(new com.example.holidayplanner.exception.InvalidParameterException("non ISO 3166-1 alpha-2 compliant country code(s) 'XX'"));
 
         mockMvc.perform(get("/api/holidays/shared/2025/XX/GB")
@@ -188,7 +186,7 @@ class HolidayControllerIntegrationTest {
     void getSharedHolidays_NoResourceFoundException() throws Exception {
         doAnswer(invocation -> {
             throw new NoResourceFoundException(HttpMethod.GET, "/invalid/path");
-        }).when(holidayService).getSharedHolidays(anyString(), anyString(), anyString());
+        }).when(holidayServiceContract).getSharedHolidays(anyString(), anyString(), anyString());
 
         mockMvc.perform(get("/api/holidays/shared1/2025/XX/GB")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -201,7 +199,7 @@ class HolidayControllerIntegrationTest {
     @Test
     @DisplayName("when no shared holidays returns empty list")
     void getSharedHolidays_NoSharedHolidays_ReturnsEmptyList() throws Exception {
-        when(holidayService.getSharedHolidays(anyString(), anyString(), anyString())).thenReturn(Collections.emptyList());
+        when(holidayServiceContract.getSharedHolidays(anyString(), anyString(), anyString())).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/holidays/shared/2025/NL/FR")
                         .contentType(MediaType.APPLICATION_JSON))

@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.example.planning</groupId>
     <artifactId>holiday-planner-api</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <name>holiday-planner-api</name>
     <description>api to help for holiday planning</description>
     <!-- Properties for managing versions of dependencies and plugins -->
@@ -20,10 +20,11 @@
         <springdoc.version>2.8.13</springdoc.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <hibernate-validator.version>9.0.1.Final</hibernate-validator.version>
-        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
-        <openapi-generator-maven-plugin.version>7.15.0</openapi-generator-maven-plugin.version>
         <jackson-databind-nullable.version>0.2.7</jackson-databind-nullable.version>
+        <openapi-generator-maven-plugin.version>7.15.0</openapi-generator-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+        <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
     </properties>
     <url/>
     <licenses>
@@ -56,17 +57,23 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cache</artifactId>
-        </dependency>
         <!-- SpringDoc dependency for OpenAPI documentation generation with swagger ui -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
-        <!-- Caffeine dependency for caching support -->
+        <!-- OpenAPI Generator dependencies for generating API interfaces and models from OpenAPI specifications -->
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>${jackson-databind-nullable.version}</version>
+        </dependency>
+        <!-- Spring caching and Caffeine dependency for caching support -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
@@ -87,12 +94,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
-        </dependency>
-        <!-- OpenAPI Generator dependencies for generating API interfaces and models from OpenAPI specifications -->
-        <dependency>
-            <groupId>org.openapitools</groupId>
-            <artifactId>jackson-databind-nullable</artifactId>
-            <version>${jackson-databind-nullable.version}</version>
         </dependency>
         <!-- Actuator and Micrometer dependencies for health monitoring and metrics collection -->
         <dependency>
@@ -131,30 +132,30 @@
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <version>${openapi-generator-maven-plugin.version}</version>
+                <configuration>
+                    <inputSpec>${project.basedir}/src/main/resources/open-api/open-api-specifications.yaml</inputSpec>
+                    <generatorName>spring</generatorName>
+                    <output>${project.build.directory}/generated-sources/openapi</output>
+                    <apiPackage>com.example.holidayplanner.generated.contract</apiPackage>
+                    <modelPackage>com.example.holidayplanner.generated.model</modelPackage>
+                    <generateApiTests>false</generateApiTests>
+                    <generateModelTests>false</generateModelTests>
+                    <generateApiDocumentation>true</generateApiDocumentation>
+                    <configOptions>
+                        <interfaceOnly>true</interfaceOnly>
+                        <useSpringBoot3>true</useSpringBoot3>
+                        <useJakartaEe>true</useJakartaEe>
+                        <useTags>true</useTags>
+                        <generateConstructorWithAllArgs>true</generateConstructorWithAllArgs>
+                        <generateExamples>true</generateExamples>
+                    </configOptions>
+                </configuration>
                 <executions>
                     <execution>
                         <id>generate-sources</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/open-api/open-api-specifications.yaml</inputSpec>
-                            <generatorName>spring</generatorName>
-                            <output>${project.build.directory}/generated-sources/openapi</output>
-                            <apiPackage>com.example.holidayplanner.contract</apiPackage>
-                            <modelPackage>com.example.holidayplanner.model</modelPackage>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelTests>false</generateModelTests>
-                            <generateModelDocumentation>true</generateModelDocumentation>
-                            <configOptions>
-                                <interfaceOnly>true</interfaceOnly>
-                                <useSpringBoot3>true</useSpringBoot3>
-                                <useJakartaEe>true</useJakartaEe>
-                                <useTags>true</useTags>
-                                <generateConstructorWithAllArgs>true</generateConstructorWithAllArgs>
-                                <generateExamples>true</generateExamples>
-                            </configOptions>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -200,7 +201,7 @@
                 <configuration>
                 <excludes>
                     <exclude>com/example/holidayplanner/config/**</exclude>
-                    <exclude>com/example/holidayplanner/model/**</exclude>
+                    <exclude>com/example/holidayplanner/**/model/**</exclude>
                     <exclude>com/example/holidayplanner/**/contract/**</exclude>
                 </excludes>
                 </configuration>
@@ -231,6 +232,24 @@
                                 </rule>
                             </rules>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Maven Javadoc Plugin to generate Javadoc and attach it to the build artifacts -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <show>private</show>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

@@ -1,9 +1,9 @@
 package com.example.holidayplanner.service;
 
-import com.example.holidayplanner.model.CountryHolidayCount;
-import com.example.holidayplanner.model.Holiday;
-import com.example.holidayplanner.model.SharedHoliday;
-import com.example.holidayplanner.validation.InputParameterValidator;
+import com.example.holidayplanner.generated.model.CountryHolidayCount;
+import com.example.holidayplanner.generated.model.Holiday;
+import com.example.holidayplanner.generated.model.SharedHoliday;
+import com.example.holidayplanner.validation.contract.HolidayServiceValidatorContract;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.AfterEach;
@@ -27,7 +27,7 @@ class HolidayServiceTest {
     private NagerDateApiService nagerDateApiService;
 
     @Mock
-    private InputParameterValidator inputParameterValidator;
+    private HolidayServiceValidatorContract holidayServiceValidator;
 
     @InjectMocks
     private HolidayService holidayService;
@@ -61,7 +61,7 @@ class HolidayServiceTest {
 
         assertEquals(2, holidays.size());
         assertEquals("Eerste Paasdag", holidays.get(0).getLocalName());
-        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), anyString());
+        verify(holidayServiceValidator).validateCountryCodesAndDays(anySet(), anyString());
     }
 
     @Test
@@ -85,7 +85,32 @@ class HolidayServiceTest {
 
         assertEquals(4, holidays.size());
         assertEquals("Goede Vrijdag", holidays.get(0).getLocalName());
-        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), anyString());
+        verify(holidayServiceValidator).validateCountryCodesAndDays(anySet(), anyString());
+    }
+
+
+    @Test
+    @DisplayName("Test getLastNumberOfHolidays with null date and also holiday previous year null date")
+    void getLastNumberOfHolidays_NullDateInputCurrentAndPreviousYearHolidays() {
+        List<Holiday> currentYearHoliday = List.of(
+                new Holiday(null, "Nieuwjaarsdag"),
+                new Holiday("2025-04-18", "Goede Vrijdag")
+        );
+        List<Holiday> lastYearHoliday = List.of(
+                new Holiday(null, "Tweede Pinksterdag"),
+                new Holiday(null, "Eerste Kerstdag"),
+                new Holiday(null, "Tweede Kerstdag")
+        );
+        int currentYear = 2025;
+        int lastYear = 2024;
+        when(nagerDateApiService.fetchHolidays(eq(currentYear), anyString())).thenReturn(currentYearHoliday);
+        when(nagerDateApiService.fetchHolidays(eq(lastYear), anyString())).thenReturn(lastYearHoliday);
+
+        List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", "4");
+
+        assertEquals(1, holidays.size());
+        assertEquals("Goede Vrijdag", holidays.get(0).getLocalName());
+        verify(holidayServiceValidator).validateCountryCodesAndDays(anySet(), anyString());
     }
 
     @Test
@@ -98,7 +123,7 @@ class HolidayServiceTest {
         List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", null);
 
         assertEquals(3, holidays.size());
-        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), eq(null));
+        verify(holidayServiceValidator).validateCountryCodesAndDays(anySet(), eq(null));
     }
 
     @Test
@@ -111,7 +136,7 @@ class HolidayServiceTest {
         List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", "abcd");
 
         assertEquals(3, holidays.size());
-        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), eq("abcd"));
+        verify(holidayServiceValidator).validateCountryCodesAndDays(anySet(), eq("abcd"));
     }
 
     @Test
@@ -124,7 +149,7 @@ class HolidayServiceTest {
         List<Holiday> holidays = holidayService.getLastNumberOfHolidays("NL", "-1");
 
         assertEquals(3, holidays.size());
-        verify(inputParameterValidator).validateCountryCodesAndDays(anySet(), eq("-1"));
+        verify(holidayServiceValidator).validateCountryCodesAndDays(anySet(), eq("-1"));
     }
 
     @Test
@@ -137,7 +162,7 @@ class HolidayServiceTest {
         assertEquals(1, counts.size());
         assertEquals("NL", counts.get(0).getCountryCode());
         assertEquals(2, counts.get(0).getHolidayCount());
-        verify(inputParameterValidator).validateCountryCodesAndYear(anyString(), anySet());
+        verify(holidayServiceValidator).validateCountryCodesAndYear(anyString(), anySet());
     }
 
     @Test
@@ -180,7 +205,7 @@ class HolidayServiceTest {
 
         assertEquals(1, sharedHolidays.size());
         assertEquals("2025-01-01", sharedHolidays.get(0).getDate());
-        verify(inputParameterValidator).validateSharedHolidayCountryCodesAndYear(anyString(), anySet());
+        verify(holidayServiceValidator).validateSharedHolidayCountryCodesAndYear(anyString(), anySet());
     }
 
     @Test
@@ -195,6 +220,6 @@ class HolidayServiceTest {
         List<SharedHoliday> sharedHolidays = holidayService.getSharedHolidays("2025", "NL", "DE");
 
         assertTrue(sharedHolidays.isEmpty());
-        verify(inputParameterValidator).validateSharedHolidayCountryCodesAndYear(anyString(), anySet());
+        verify(holidayServiceValidator).validateSharedHolidayCountryCodesAndYear(anyString(), anySet());
     }
 }

@@ -23,6 +23,12 @@ while building application with `mvnw clean package` command, code will be gener
 - Run `mvnw clean package` from the project root.
 - Wait for the build to complete successfully.
 
+## Test Plan and Performance Test
+- Test plan is available in `docs` directory as `TestDesignDocument.md` file.
+- Performance test is done using Apache JMeter 4.0 tool.
+- Test script available inside `performance_test` directory as `api-load-test.jmx` file.
+- Application is load tested for 5 minute with 5 users, 150 request per seconds with ramp-up time and 1 seconds.
+
 ## Check Test Reports
 - After successful build, open file manager and navigate to the `{project root}/target/site/jacoco` directory.
 - Open `index.html` present in this directory with web browser to check test coverage report.
@@ -37,7 +43,7 @@ while building application with `mvnw clean package` command, code will be gener
 - Ensure you have Docker installed and configured in your system.
 - After building application with `mvnw clean package` 
 - run `docker compose up -d` from the project root directory. It should build docker image and start the container.
-- Optionally we can run `sh build_docker.sh` to build image with tag 2.0.0. It will build image `holidayplanner.example.com/api/holiday-planner-api:2.0.0`
+- Optionally we can run `sh build_docker.sh` to build image with tag 2.1.0. It will build image `holidayplanner.example.com/api/holiday-planner-api:2.1.0`
 - We can change in docker-compose.yml file to use this image instead of building at startup of `docker compose up -d`. Just comment (#) line 7,8,9 and uncomment line 6.
 
 ## Access Swagger UI
@@ -73,6 +79,6 @@ while building application with `mvnw clean package` command, code will be gener
 - The code assumes holidays are fetched in the format provided by Nager Date (date in `YYYY-MM-DD` and `localName`).
 
 # Issues
-- Swager UI is not taking example values in text fields. The issue might be related to a bug in springdoc-openapi.
+- Swagger UI is not taking example values in text fields and response schemas. The issue might be related to a bug in springdoc-openapi.
 - This doesn't impact functionality, but it would be good to have example values in text fields for better user experience.
 - We can manually enter values in text fields via configuration but that doesn't look good so skipped it for now.

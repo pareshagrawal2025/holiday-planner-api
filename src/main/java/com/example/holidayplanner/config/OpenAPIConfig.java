@@ -11,13 +11,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-// Open API configuration class to set up API metadata and server information
+/**
+ * This is Open API configuration class to set up API metadata and server information
+ * for Swagger UI documentation.
+ * <p>
+ * It defines the OpenAPI bean with custom metadata, contact, license, and server details for the Holiday Planner API.
+ */
 @Configuration
 public class OpenAPIConfig {
 
     @Value("${holidayapi.openapi.dev-url}")
     private String openApiDevUrl;
 
+    /**
+     * Defines the OpenAPI bean with custom API metadata, contact, license, and server information.
+     * <p>
+     * Sets up development and production server URLs, contact details, and license information for Swagger UI.
+     *
+     * @return OpenAPI object containing API documentation configuration
+     */
     @Bean
     public OpenAPI customOpenAPI() {
         Server devServer = new Server();
@@ -40,7 +52,7 @@ public class OpenAPIConfig {
 
         Info info = new Info()
                 .title("Holiday Information API")
-                .version("2.0.0")
+                .version("2.1.0")
                 .description("API for retrieving holiday information using Nager Date API")
                 .contact(contact)
                 .license(license);

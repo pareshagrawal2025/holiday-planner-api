@@ -16,12 +16,17 @@ import org.springframework.stereotype.Component;
 import com.example.holidayplanner.exception.InvalidParameterException;
 import com.example.holidayplanner.model.AvailableCountry;
 import com.example.holidayplanner.service.NagerDateApiService;
+import com.example.holidayplanner.validation.contract.HolidayServiceValidatorContract;
 
-// This class contains methods to validate all input parameters for all holiday API endpoints
+/**
+ * This class contains methods to validate all input parameters for all holiday API endpoints.
+ * <p>
+ * It validates country codes, years, and number of holidays for different holiday service operations.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class InputParameterValidator {
+public class HolidayServiceValidator implements HolidayServiceValidatorContract {
 
     private final NagerDateApiService nagerDateApiService;
 
@@ -34,15 +39,25 @@ public class InputParameterValidator {
     @Value("${max.holiday.search.supported.year:2075}")
     private int maxHolidaySupportedYear;
 
-    // Filter out invalid country codes from input set
+    /**
+     * Filters out invalid country codes from the input set.
+     *
+     * @param inputCountryCodes Set of country codes to validate
+     * @return Set of valid country codes
+     */
     private HashSet<String> filterInvalidCountryCode(Set<String> inputCountryCodes) {
         return new HashSet<>(inputCountryCodes.stream()
                 .filter(item -> List.of(Locale.getISOCountries()).contains(item))
                 .toList());
     }
 
-    // Check if a single input country code is valid ISO 3166-1 alpha-2 code
-    // Append invalid codes to the provided StringBuilder
+    /**
+     * Checks if a single input country code is valid ISO 3166-1 alpha-2 code.
+     * Appends invalid codes to the provided StringBuilder.
+     *
+     * @param invalidCountryCodes StringBuilder to append invalid codes
+     * @param inputCountryCode country code to validate
+     */
     private void checkIfValidCountryCode(StringBuilder invalidCountryCodes, String inputCountryCode) {
         if (StringUtils.isEmpty(inputCountryCode) || inputCountryCode.length() != 2) {
             if (!invalidCountryCodes.isEmpty()) {
@@ -60,8 +75,13 @@ public class InputParameterValidator {
         }
     }
 
-    // Validate all input set of country codes compliant to ISO 3166-1 alpha-2 codes
-    // Append error message to the provided list if any invalid code found
+    /**
+     * Validates all input set of country codes compliant to ISO 3166-1 alpha-2 codes.
+     * Appends error message to the provided list if any invalid code found.
+     *
+     * @param inputCountryCodes Set of country codes to validate
+     * @param errorMessages List to append error messages
+     */
     private void validateInputCountryCodes(Set<String> inputCountryCodes, ArrayList<String> errorMessages) {
         StringBuilder invalidCountryCodes = new StringBuilder();
         for (String countryCode : inputCountryCodes) {
@@ -73,8 +93,13 @@ public class InputParameterValidator {
         }
     }
 
-    // Validate input year is a number and within supported range
-    // Append error message to the provided list if invalid input year found
+    /**
+     * Validates input year is a number and within supported range.
+     * Appends error message to the provided list if invalid input year found.
+     *
+     * @param inputYear Year to validate
+     * @param errorMessages List to append error messages
+     */
     private void validateInputYear(String inputYear, ArrayList<String> errorMessages) {
         if (StringUtils.isEmpty(inputYear)) {
             errorMessages.add(String.format("empty or null input year, must be between %d and %d inclusive", minHolidaySupportedYear, maxHolidaySupportedYear));
@@ -91,8 +116,13 @@ public class InputParameterValidator {
         }
     }
 
-    // Validate input number of holidays is a number and within supported range
-    // Append error message to the provided list if invalid input value found
+    /**
+     * Validates input number of holidays is a number and within supported range.
+     * Appends error message to the provided list if invalid input value found.
+     *
+     * @param inputNumberOfHolidaysStr Number of holidays to validate
+     * @param errorMessages List to append error messages
+     */
     private void validateInputNumberOfHolidays(String inputNumberOfHolidaysStr, ArrayList<String> errorMessages) {
         if (StringUtils.isEmpty(inputNumberOfHolidaysStr)) {
             // use default value if input is empty or null
@@ -109,7 +139,11 @@ public class InputParameterValidator {
         }
     }
 
-    // If any error in input parameters throw exception with all error messages in one go
+    /**
+     * If any error in input parameters, throws exception with all error messages in one go.
+     *
+     * @param errorMessage List of error messages
+     */
     private void throwExceptionIfError(ArrayList <String> errorMessage){
         if (!errorMessage.isEmpty()) {
             String errorMessageStr = String.join(", ", errorMessage);
@@ -118,8 +152,14 @@ public class InputParameterValidator {
         }
     }
 
-    // Check if input country codes are supported by Nager Date API service
-    // Append unsupported code found to the provided input list
+    /**
+     * Checks if input country codes are supported by Nager Date API service.
+     * Appends unsupported code found to the provided input list.
+     *
+     * @param supportedCountries Set of supported countries
+     * @param inputCountryCodes Set of input country codes
+     * @param errorInInputCountryCodes List to append error messages
+     */
     private void checkIfCountiesSupported(Set<AvailableCountry> supportedCountries, Set<String> inputCountryCodes, ArrayList<String> errorInInputCountryCodes) {
         StringBuilder unSupportedCountryCodes = new StringBuilder();
         Set<String> validInputCodes = inputCountryCodes;
@@ -140,8 +180,13 @@ public class InputParameterValidator {
         }
     }
 
-    // called by Holiday Service, it validates set of input country codes and number of days
-    // for last N holidays
+    /**
+     * Called by Holiday Service, it validates set of input country codes and number of days for last N holidays.
+     *
+     * @param inputCountryCodes Set of input country codes
+     * @param numberOfDaysStr Number of days as string
+     */
+    @Override
     public void validateCountryCodesAndDays(Set<String> inputCountryCodes, String numberOfDaysStr) {
         ArrayList <String> errorMessage = new ArrayList<>();
         validateInputNumberOfHolidays(numberOfDaysStr, errorMessage);
@@ -151,7 +196,13 @@ public class InputParameterValidator {
         throwExceptionIfError(errorMessage);
     }
 
-    // called by Holiday Service, it validates set of input country codes and input year
+    /**
+     * Called by Holiday Service, it validates set of input country codes and input year.
+     *
+     * @param yearString Year as string
+     * @param inputCountryCodes Set of input country codes
+     */
+    @Override
     public void validateCountryCodesAndYear(String yearString, Set<String> inputCountryCodes) {
         ArrayList <String> errorMessage = new ArrayList<>();
         validateInputCountryCodes(inputCountryCodes, errorMessage);
@@ -161,7 +212,13 @@ public class InputParameterValidator {
         throwExceptionIfError(errorMessage);
     }
 
-    // called by Holiday Service, it validates exactly two different input country codes and input year
+    /**
+     * Called by Holiday Service, it validates exactly two different input country codes and input year for shared holidays.
+     *
+     * @param year Year as string
+     * @param inputCountryCodes Set of input country codes
+     */
+    @Override
     public void validateSharedHolidayCountryCodesAndYear(String year, Set<String> inputCountryCodes) {
         ArrayList <String> errorMessage = new ArrayList<>();
         if (inputCountryCodes.size() != 2) {

@@ -21,23 +21,23 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class InputParameterValidatorTest {
+class HolidayServiceValidatorTest {
 
     @Mock
     private NagerDateApiService nagerDateApiService;
 
     @InjectMocks
-    private InputParameterValidator inputParameterValidator;
+    private HolidayServiceValidator holidayServiceValidator;
 
     private AutoCloseable closeable;
 
     @BeforeEach
     void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
-        ReflectionTestUtils.setField(inputParameterValidator, "maxHolidayDays", 12);
-        ReflectionTestUtils.setField(inputParameterValidator, "minHolidaySupportedYear", 1975);
-        ReflectionTestUtils.setField(inputParameterValidator, "maxHolidaySupportedYear", 2075);
-        ReflectionTestUtils.setField(inputParameterValidator, "nagerDateApiService", nagerDateApiService);
+        ReflectionTestUtils.setField(holidayServiceValidator, "maxHolidayDays", 12);
+        ReflectionTestUtils.setField(holidayServiceValidator, "minHolidaySupportedYear", 1975);
+        ReflectionTestUtils.setField(holidayServiceValidator, "maxHolidaySupportedYear", 2075);
+        ReflectionTestUtils.setField(holidayServiceValidator, "nagerDateApiService", nagerDateApiService);
     }
 
     @AfterEach
@@ -52,7 +52,7 @@ class InputParameterValidatorTest {
         Set<String> inputCountryCodes = new HashSet<>(Set.of("NL", "FR"));
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createAvailableCountries());
 
-        assertDoesNotThrow(() -> inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, "5"));
+        assertDoesNotThrow(() -> holidayServiceValidator.validateCountryCodesAndDays(inputCountryCodes, "5"));
         verify(nagerDateApiService).getAvailableCountries();
     }
 
@@ -63,7 +63,7 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createAvailableCountries());
 
         InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
-                inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, "5"));
+                holidayServiceValidator.validateCountryCodesAndDays(inputCountryCodes, "5"));
         assertTrue(exception.getMessage().contains("non ISO 3166-1 alpha-2 compliant country code(s)"));
     }
 
@@ -74,7 +74,7 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createNl());
 
         InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
-                inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, "20"));
+                holidayServiceValidator.validateCountryCodesAndDays(inputCountryCodes, "20"));
         assertTrue(exception.getMessage().contains("non-supported numberOfHolidays"));
     }
 
@@ -85,7 +85,7 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createNl());
 
         InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
-                inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, "abc"));
+                holidayServiceValidator.validateCountryCodesAndDays(inputCountryCodes, "abc"));
         assertTrue(exception.getMessage().contains("input number of holiday 'abc' is not a valid number"));
     }
 
@@ -95,7 +95,7 @@ class InputParameterValidatorTest {
         Set<String> inputCountryCodes = new HashSet<>(Set.of("NL"));
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createNl());
 
-        assertDoesNotThrow(() -> inputParameterValidator.validateCountryCodesAndDays(inputCountryCodes, "5"));
+        assertDoesNotThrow(() -> holidayServiceValidator.validateCountryCodesAndDays(inputCountryCodes, "5"));
         verify(nagerDateApiService).getAvailableCountries();
     }
 
@@ -105,7 +105,7 @@ class InputParameterValidatorTest {
         Set<String> inputCountryCodes = new HashSet<>(Set.of("NL"));
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createNl());
 
-        assertDoesNotThrow(() -> inputParameterValidator.validateCountryCodesAndYear("2025", inputCountryCodes));
+        assertDoesNotThrow(() -> holidayServiceValidator.validateCountryCodesAndYear("2025", inputCountryCodes));
         verify(nagerDateApiService).getAvailableCountries();
     }
 
@@ -116,7 +116,7 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createAvailableCountries());
 
         Assertions.assertThrowsExactly(InvalidParameterException.class, () ->
-                inputParameterValidator.validateCountryCodesAndYear("2025", inputCountryCodes));
+                holidayServiceValidator.validateCountryCodesAndYear("2025", inputCountryCodes));
         verify(nagerDateApiService).getAvailableCountries();
     }
 
@@ -127,7 +127,7 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createAvailableCountries());
 
         Assertions.assertThrowsExactly(InvalidParameterException.class, () ->
-                inputParameterValidator.validateSharedHolidayCountryCodesAndYear("abcd", inputCountryCodes));
+                holidayServiceValidator.validateSharedHolidayCountryCodesAndYear("abcd", inputCountryCodes));
         verify(nagerDateApiService).getAvailableCountries();
     }
 
@@ -138,7 +138,7 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createAvailableCountries());
 
         Assertions.assertThrowsExactly(InvalidParameterException.class, () ->
-                inputParameterValidator.validateSharedHolidayCountryCodesAndYear(null, inputCountryCodes));
+                holidayServiceValidator.validateSharedHolidayCountryCodesAndYear(null, inputCountryCodes));
         verify(nagerDateApiService).getAvailableCountries();
     }
 
@@ -149,7 +149,7 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createNl());
 
         InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
-                inputParameterValidator.validateCountryCodesAndYear("1900", inputCountryCodes));
+                holidayServiceValidator.validateCountryCodesAndYear("1900", inputCountryCodes));
         assertTrue(exception.getMessage().contains("non-supported year"));
     }
 
@@ -159,7 +159,7 @@ class InputParameterValidatorTest {
         Set<String> inputCountryCodes = new HashSet<>(Set.of("NL", "FR"));
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createAvailableCountries());
 
-        assertDoesNotThrow(() -> inputParameterValidator.validateSharedHolidayCountryCodesAndYear("2025", inputCountryCodes));
+        assertDoesNotThrow(() -> holidayServiceValidator.validateSharedHolidayCountryCodesAndYear("2025", inputCountryCodes));
         verify(nagerDateApiService).getAvailableCountries();
     }
 
@@ -170,7 +170,7 @@ class InputParameterValidatorTest {
         when(nagerDateApiService.getAvailableCountries()).thenReturn(createNl());
 
         InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
-                inputParameterValidator.validateSharedHolidayCountryCodesAndYear("2025", inputCountryCodes));
+                holidayServiceValidator.validateSharedHolidayCountryCodesAndYear("2025", inputCountryCodes));
         assertTrue(exception.getMessage().contains("two different codes must be provided"));
     }
 

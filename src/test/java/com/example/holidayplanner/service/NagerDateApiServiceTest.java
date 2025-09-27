@@ -2,7 +2,7 @@ package com.example.holidayplanner.service;
 
 import com.example.holidayplanner.exception.InvalidParameterException;
 import com.example.holidayplanner.model.AvailableCountry;
-import com.example.holidayplanner.model.Holiday;
+import com.example.holidayplanner.generated.model.Holiday;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
