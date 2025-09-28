@@ -243,6 +243,8 @@
                 <configuration>
                     <source>${java.version}</source>
                     <show>private</show>
+                    <outputDirectory>${project.build.directory}/javadocs</outputDirectory>
+                    <finalName>generated-${project.name}-${project.version}</finalName>
                 </configuration>
                 <executions>
                     <execution>
@@ -253,7 +255,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 

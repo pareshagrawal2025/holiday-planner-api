@@ -24,6 +24,12 @@ while building application with `mvnw clean package` command, code will be gener
 - Run `mvnw clean package` from the project root.
 - Wait for the build to complete successfully.
 
+## API Java Docs
+- Java docs are generated using `maven-javadoc-plugin` while building application with `mvnw clean package` command.
+- After successful build, open file manager and navigate to the `{project root}/target/javadocs/apidocs` directory.
+- Open `index.html` present in this directory with web browser to check API java docs.
+- API javadoc jar is also available as in `{project root}/target` directory as `generated-${project name}-${project version}-javadoc.jar`
+
 ## Test Plan and Performance Test
 - Test plan is available in `docs` directory as `TestDesignDocument.md` file.
 - Performance test is done using Apache JMeter 4.0 tool.
@@ -45,7 +51,7 @@ while building application with `mvnw clean package` command, code will be gener
 - After building application with `mvnw clean package` 
 - run `docker compose up -d` from the project root directory. It should build docker image and start the container.
 - Optionally we can run `sh build_docker.sh` to build image with tag 2.1.0. It will build image `holidayplanner.example.com/api/holiday-planner-api:2.1.0`
-- We can change in docker-compose.yml file to use this image instead of building at startup of `docker compose up -d`. Just comment (#) line 7,8,9 and uncomment line 6.
+- We can change in docker-compose.yml file to use this newly created image instead of building at startup of `docker compose up -d`. Just comment (#) line 7,8,9 and uncomment line 6.
 
 ## Access Swagger UI
 - Open `http://localhost:8080/swagger-ui/index.html` in web browser to view the interactive API documentation.
