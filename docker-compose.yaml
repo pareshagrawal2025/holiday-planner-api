@@ -1,6 +1,6 @@
-# Docker Compose configuration for the holiday API service with health check and network settings
+# Docker Compose configuration for the Holiday Planner API service with health check and network settings
 # latest docker or docker-compose must be available in your system to start services.
-# To start the service, run: docker-compose up -d  or docker compose up -d
+# To start the service from project root directory, run: docker-compose up -d  or docker compose up -d
 services:
   holiday-planner-api:
     #image: holidayplanner.example.com/api/holiday-planner-api:2.1.0
